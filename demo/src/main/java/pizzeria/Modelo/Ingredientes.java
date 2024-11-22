@@ -10,10 +10,11 @@ public class Ingredientes {
     private int id;
     @CsvBindByName(column = "NOMBRE")
     private String nombre;
-    @CsvBindAndSplitByName(elementType = String.class, splitOn = ",")
+    @CsvBindAndSplitByName(elementType = String.class, writeDelimiter  = ",")
     private List<String> alergenos;
+    
     static int contador = 0;
-
+     
     public Ingredientes() {
     }
 

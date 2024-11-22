@@ -99,4 +99,21 @@ public class GestionarFicheros {
         System.out.println("Clientes exportados correctamente a: " + archivoDestino);
     }
 
+
+ 
+
+     public void   exportarCochesCSV(List<coche> listaCoches ,   String fichero) throws FileNotFoundException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
+
+          try(PrintWriter escribir =  new PrintWriter(fichero)){
+
+             StatefulBeanToCsv<coche>  csvToBin = new  StatefulBeanToCsvBuilder<coche>(escribir).withSeparator(';').build();  
+               csvToBin.write(listaCoches);
+             
+          }
+
+
+     }
+
+
+
 }
