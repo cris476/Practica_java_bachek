@@ -10,16 +10,26 @@ public class Ingredientes {
     private int id;
     @CsvBindByName(column = "NOMBRE")
     private String nombre;
-    @CsvBindAndSplitByName(elementType = String.class, writeDelimiter  = ",")
-    private List<String> alergenos;
-    
+    @CsvBindAndSplitByName(elementType = String.class, writeDelimiter = ",")
+    private List<Alergeno> alergenos;
+
     static int contador = 0;
-     
+
     public Ingredientes() {
     }
 
-    public Ingredientes(String nombre, List<String> alergenos) {
-        this.id = this.contador++;
+    public Ingredientes(int id, String nombre) {
+        this.id = id;
+        this.nombre = nombre;
+    }
+
+    public Ingredientes(String nombre, List<Alergeno> alergenos) {
+        this.nombre = nombre;
+        this.alergenos = alergenos;
+    }
+
+    public Ingredientes(int id, String nombre, List<Alergeno> alergenos) {
+        this.id = id;
         this.nombre = nombre;
         this.alergenos = alergenos;
     }
@@ -40,11 +50,11 @@ public class Ingredientes {
         this.nombre = nombre;
     }
 
-    public List<String> getAlergenos() {
+    public List<Alergeno> getAlergenos() {
         return alergenos;
     }
 
-    public void setAlergenos(List<String> alergenos) {
+    public void setAlergenos(List<Alergeno> alergenos) {
         this.alergenos = alergenos;
     }
 

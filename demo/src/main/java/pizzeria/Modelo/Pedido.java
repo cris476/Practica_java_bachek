@@ -78,9 +78,6 @@ public List<LineaPedido> getListaLineaPedidos() {
 public void setListaLineaPedidos(List<LineaPedido> listaLineaPedidos) {
     this.listaLineaPedidos = listaLineaPedidos;
 } 
-
-
-
    
 
 }

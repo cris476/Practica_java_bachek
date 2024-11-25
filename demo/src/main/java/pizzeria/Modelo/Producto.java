@@ -3,19 +3,21 @@ package pizzeria.Modelo;
 /**
  * Producto
  */
-public abstract class Producto  {
+public abstract class Producto {
 
- 
-   protected int id ; 
-   protected String nombre ; 
-   protected double precio; 
-   static  int contador = 0; 
+    protected int id;
+    protected String nombre;
+    protected double precio;
 
-    public Producto(String nombre ,double precio ){
-           this.id = this.contador++ ; 
-           this.nombre = nombre ; 
-           this.precio = precio ; 
+    public Producto(int id, String nombre, double precio) {
+        this.id = id;
+        this.nombre = nombre;
+        this.precio = precio;
+    }
 
+    public Producto(String nombre, double precio) {
+        this.nombre = nombre;
+        this.precio = precio;
     }
 
     public int getId() {
@@ -42,8 +44,4 @@ public abstract class Producto  {
         this.precio = precio;
     }
 
-    
-     
-
-    
 }

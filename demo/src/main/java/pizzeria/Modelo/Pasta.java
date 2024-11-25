@@ -2,8 +2,6 @@ package pizzeria.Modelo;
 
 import java.util.List;
 
-
-
 public class Pasta extends Producto {
 
     private List<Ingredientes> ingredientes;
@@ -16,6 +14,10 @@ public class Pasta extends Producto {
     @Override
     public String toString() {
         return "Pasta [id=" + id + ", nombre=" + nombre + ", precio=" + precio + ", ingredientes=" + ingredientes + "]";
+    }
+
+    public List<Ingredientes> getIngredientes() {
+        return ingredientes;
     }
 
 }

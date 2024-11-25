@@ -23,6 +23,18 @@ public class Cliente {
     public Cliente() {
     }
 
+    public Cliente(String dni, String nombre, String direccion, String telefono, String email,
+            String password, Boolean admin) {
+        this.id = id;
+        this.dni = dni;
+        this.nombre = nombre;
+        this.direccion = direccion;
+        this.telefono = telefono;
+        this.email = email;
+        this.admin = admin;
+        this.password = password;
+    }
+
     public Cliente(int id, String dni, String nombre, String direccion, String telefono, String email,
             String password, Boolean admin) {
         this.id = id;
