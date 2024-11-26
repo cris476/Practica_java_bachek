@@ -30,10 +30,20 @@ public class ControladorProductoTest {
         alergenosPizza.add(new Alergeno("Pelizilina"));
 
         List<Ingredientes> ingredientesPizza = new ArrayList<Ingredientes>();
-        ingredientesPizza.add(new Ingredientes("Tomate", alergenosPizza));
+        ingredientesPizza.add(new Ingredientes("Tomate8", alergenosPizza));
 
         Pizza pizza = new Pizza("Peperonni", 15, SizeApp.MEDIANO, ingredientesPizza);
 
         controladorProducto.registrarProducto(pizza);
     }
 }
+
+
+/* 
+ * 
+ * java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a child row: a foreign key constraint fails (`pizzeria`.`ingrediente_alergeno`, CONSTRAINT `ingrediente_alergeno_ibfk_1` FOREIGN KEY (`id_ingrediente`) REFERENCES `ingrediente` (`ID`) ON DELETE CASCADE)
+
+
+ java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a child row: a foreign key constraint fails (`pizzeria`.`ingrediente_alergeno`, CONSTRAINT `ingrediente_alergeno_ibfk_1` FOREIGN KEY (`id_ingrediente`) REFERENCES `ingrediente` (`ID`) ON DELETE CASCADE)
+
+ */

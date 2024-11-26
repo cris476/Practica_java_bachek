@@ -14,6 +14,7 @@ import pizzeria.Modelo.Pasta;
 import pizzeria.Modelo.Pizza;
 import pizzeria.Modelo.Producto;
 import static pizzeria.utils.DatabaseConfig.*;
+import pizzeria.Modelo.Tipo;
 
 public class JdbcProductoDAO implements InnerProductoDAO {
 
@@ -33,9 +34,9 @@ public class JdbcProductoDAO implements InnerProductoDAO {
 
                             Ingredientes ingredienteEncontrado = jdbcIngredienteDAO.findByName(ingrediente.getNombre());
                             if (ingredienteEncontrado == null) {
-                                   insertarIngredienteYRelacion(con, idProducto, ingrediente);
+                                insertarIngredienteYRelacion(con, idProducto, ingrediente);
                             } else {
-                                  
+                                jdbcIngredienteDAO.saveWithIngrediente(con, idProducto, ingredienteEncontrado);
                             }
                         }
                     }
@@ -55,8 +56,6 @@ public class JdbcProductoDAO implements InnerProductoDAO {
             }
         }
     }
-
- 
 
     private int insertarProducto(Connection con, Producto producto) throws SQLException, ClassNotFoundException {
         try (PreparedStatement preparedStatement = con.prepareStatement(INSERT_PRODUCTO,
@@ -92,14 +91,16 @@ public class JdbcProductoDAO implements InnerProductoDAO {
 
         preparedStatement.setString(1, pizza.getNombre());
         preparedStatement.setDouble(2, pizza.getPrecio());
-        preparedStatement.setString(3, pizza.getSize().getValue());
+        preparedStatement.setString(3, Tipo.PIZZA.getValue());
+        preparedStatement.setString(4, pizza.getSize().getValue());
 
     }
 
     private void saveBebida(PreparedStatement preparedStatement, Bebida bebida) throws SQLException {
         preparedStatement.setString(1, bebida.getNombre());
         preparedStatement.setDouble(2, bebida.getPrecio());
-        preparedStatement.setString(3, bebida.getSize().getValue());
+        preparedStatement.setString(3, Tipo.BEBIDA.getValue());
+        preparedStatement.setString(4, bebida.getSize().getValue());
 
     }
 
@@ -108,6 +109,7 @@ public class JdbcProductoDAO implements InnerProductoDAO {
 
         preparedStatement.setString(1, pasta.getNombre());
         preparedStatement.setDouble(2, pasta.getPrecio());
+        preparedStatement.setString(3, Tipo.PASTA.getValue());
         preparedStatement.setNull(4, java.sql.Types.NULL);
 
     }
@@ -117,8 +119,24 @@ public class JdbcProductoDAO implements InnerProductoDAO {
 
         try (Connection con = new Conexion().getConexion();
                 Statement statement = con.createStatement();
-                PreparedStatement preparedStatement = con.prepareStatement(INSERT_PRODUCTO,
-                        statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement preparedStatement = con.prepareStatement(SELECT_ALL_PRODUCTO)) {
+ 
+             try (ResultSet resultado =  preparedStatement.executeQuery(); ) {
+                 
+ 
+                  if(resultado.next()){
+                        
+                    int idProducto = resultado.getInt("id");
+                    String nombre =   resultado.getString("nombre"); 
+                    Double precio =  resultado.getDouble("precio"); 
+                    
+                     
+                  }
+                 
+             } catch (Exception e) {
+                // TODO: handle exception
+             }
+
 
             preparedStatement.executeUpdate();
 

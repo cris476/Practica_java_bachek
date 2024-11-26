@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import pizzeria.Controller.dao.InnerIngredienteDAO;
 import pizzeria.Modelo.Alergeno;
@@ -33,7 +34,7 @@ public class JdbcIngredienteDAO implements InnerIngredienteDAO {
                 if (alergenoExiste == null) {
                     jdbcAlergeno.save(con, id_ingrediente, alergeno);
                 } else {
-                    jdbcAlergeno.relacionIngredienteAlergeno(con, alergenoExiste.getId(), id_ingrediente);
+                    jdbcAlergeno.relacionIngredienteAlergeno(con, id_ingrediente, alergenoExiste.getId());
 
                 }
             }
@@ -45,24 +46,7 @@ public class JdbcIngredienteDAO implements InnerIngredienteDAO {
             throws SQLException, ClassNotFoundException {
 
         con.setAutoCommit(false);
-
-        // int id_ingrediente = insertarIngrediente(con, ingrediente);
-
         insertarProductoIngrediente(con, id_producto, ingrediente.getId());
-
-        if (ingrediente.getAlergenos() != null && ingrediente.getAlergenos().size() >= 0) {
-            for (Alergeno alergeno : ingrediente.getAlergenos()) {
-
-                Alergeno alergenoExiste = jdbcAlergeno.findByName(con, alergeno.getNombre());
-
-                if (alergenoExiste == null) {
-                    jdbcAlergeno.save(con, id_producto, alergeno);
-                } else {
-                    jdbcAlergeno.relacionIngredienteAlergeno(con, alergenoExiste.getId(), id_producto);
-
-                }
-            }
-        }
         con.commit();
     }
 
@@ -110,8 +94,10 @@ public class JdbcIngredienteDAO implements InnerIngredienteDAO {
                 if (resultado.next()) {
                     int idIngrediente = resultado.getInt("id");
                     String nombreIngrediente = resultado.getString("nombre");
-                    ingrediente = new Ingredientes(idIngrediente, nombreIngrediente);
+                    List<Alergeno> alergenos = jdbcAlergeno.getAllAlergenoByidIngrediente(idIngrediente);
+                    ingrediente = new Ingredientes(idIngrediente, nombreIngrediente, alergenos);
                 }
+
             } catch (Exception e) {
                 con.rollback();
                 throw e;

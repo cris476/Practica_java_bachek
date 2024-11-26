@@ -14,11 +14,15 @@ import pizzeria.Modelo.PagarEfectivo;
 import pizzeria.Modelo.Pasta;
 import pizzeria.Modelo.Pizza;
 import pizzeria.Modelo.SizeApp;
+import pizzeria.Modelo.Tipo;
 
 public class main2 {
  
         
         public static void main(String[] args) {
+
+
+
 
                 // ContraladorCliente controladorCliente = new ContraladorCliente();
                 // ContraladorPedido controladorpedido = new ContraladorPedido(null);
@@ -163,6 +167,7 @@ public class main2 {
                 //         System.out.println(e.getMessage());
                 //         e.printStackTrace();
                 // }
-
+ 
+                System.out.println(Tipo.PIZZA.getValue());
         }
 }

@@ -4,12 +4,16 @@ import static pizzeria.utils.DatabaseConfig.INSERT_ALERGENO;
 import static pizzeria.utils.DatabaseConfig.INSERT_INGREDIENTE_ALERGENO;
 import static pizzeria.utils.DatabaseConfig.SELECT_ALERGENO_ID;
 import static pizzeria.utils.DatabaseConfig.SELECT_ALERGENO_NOMBRE;
+import static pizzeria.utils.DatabaseConfig.SELECT_INGREDIENTE_ALERGENO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import pizzeria.Controller.dao.InnerAlergeno;
 import pizzeria.Modelo.Alergeno;
 import pizzeria.Modelo.Conexion;
@@ -23,21 +27,23 @@ public class JdbcAlergeno implements InnerAlergeno {
         try (Statement statement = con.createStatement();
                 PreparedStatement preparedStatement = con.prepareStatement(INSERT_ALERGENO,
                         statement.RETURN_GENERATED_KEYS)) {
+            con.setAutoCommit(false);
 
             preparedStatement.setString(1, alergeno.getNombre());
             preparedStatement.executeUpdate();
 
-            int id_alegeno = 0;
+            int id_alergeno = 0;
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    id_alegeno = generatedKeys.getInt(1);
+                    id_alergeno = generatedKeys.getInt(1);
                 }
             }
-            relacionIngredienteAlergeno(con, id_ingrediente, id_alegeno);
+            con.commit();
+            relacionIngredienteAlergeno(con, id_ingrediente, id_alergeno);
         }
     }
 
-    public void relacionIngredienteAlergeno(Connection con, int id_alergeno, int id_ingrediente) throws SQLException {
+    public void relacionIngredienteAlergeno(Connection con, int id_ingrediente, int id_alergeno) throws SQLException {
 
         try (PreparedStatement preparedStatement2 = con.prepareStatement(INSERT_INGREDIENTE_ALERGENO)) {
             con.setAutoCommit(false);
@@ -75,6 +81,29 @@ public class JdbcAlergeno implements InnerAlergeno {
 
             con.commit();
             return alergeno;
+        }
+
+    }
+
+    public List<Alergeno> getAllAlergenoByidIngrediente(int id_ingrediente)
+            throws SQLException, ClassNotFoundException {
+        List<Alergeno> alergenos = new ArrayList<Alergeno>();
+        try (Connection con = new Conexion().getConexion();
+                PreparedStatement preparedStatement = con.prepareStatement(SELECT_INGREDIENTE_ALERGENO);) {
+            preparedStatement.setInt(1, id_ingrediente);
+            try (ResultSet resultado = preparedStatement.executeQuery()) {
+
+                if (resultado.next()) {
+                    int idAlergeno = resultado.getInt("id");
+                    String nombreAlergeno = resultado.getString("nombre");
+                    alergenos.add(new Alergeno(idAlergeno, nombreAlergeno));
+                }
+
+            }
+            return alergenos;
+
+        } catch (SQLException | ClassNotFoundException e) {
+            throw e;
         }
 
     }

@@ -13,6 +13,8 @@ public interface InnerClienteDAO {
 
        public Cliente login(String password, String nombre) throws SQLException, ClassNotFoundException;
 
+       
+
        public void update(String id, Cliente cliente) throws SQLException, ClassNotFoundException;
 
        public List<Cliente> getAllCliente() throws SQLException, ClassNotFoundException;
