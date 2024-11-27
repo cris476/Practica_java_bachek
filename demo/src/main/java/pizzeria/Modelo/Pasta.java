@@ -6,6 +6,11 @@ public class Pasta extends Producto {
 
     private List<Ingredientes> ingredientes;
 
+    public Pasta(int id, String nombre, double precio, List<Ingredientes> ingredientes) {
+        super(id, nombre, precio);
+        this.ingredientes = ingredientes;
+    }
+
     public Pasta(String nombre, double precio, List<Ingredientes> ingredientes) {
         super(nombre, precio);
         this.ingredientes = ingredientes;

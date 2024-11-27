@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import pizzeria.Controller.dao.InnerIngredienteDAO;
@@ -94,7 +95,7 @@ public class JdbcIngredienteDAO implements InnerIngredienteDAO {
                 if (resultado.next()) {
                     int idIngrediente = resultado.getInt("id");
                     String nombreIngrediente = resultado.getString("nombre");
-                    List<Alergeno> alergenos = jdbcAlergeno.getAllAlergenoByidIngrediente(idIngrediente);
+                    List<Alergeno> alergenos = jdbcAlergeno.getAllAlergenoByidIngrediente(con, idIngrediente);
                     ingrediente = new Ingredientes(idIngrediente, nombreIngrediente, alergenos);
                 }
 
@@ -106,6 +107,28 @@ public class JdbcIngredienteDAO implements InnerIngredienteDAO {
             con.commit();
             return ingrediente;
         }
+
+    }
+
+    @Override
+    public List<Ingredientes> getAllIngredienteByidProducto(Connection con, int id) {
+        List<Ingredientes> listaIngrediente = new ArrayList<Ingredientes>();
+        try (PreparedStatement preparedStatement = con.prepareStatement(SELECT_PRODUCTO_INGREDIENTE)) {
+
+            preparedStatement.setInt(1, id);
+            try (ResultSet resultado = preparedStatement.executeQuery()) {
+                while (resultado.next()) {
+                    int idIngrediente = resultado.getInt("id");
+                    String nombreIngrediente = resultado.getString("nombre");
+                    List<Alergeno> listaAlergeno = jdbcAlergeno.getAllAlergenoByidIngrediente(con, idIngrediente);
+                    listaIngrediente.add(new Ingredientes(idIngrediente, nombreIngrediente, listaAlergeno));
+                }
+            }
+        } catch (Exception e) {
+
+        }
+
+        return listaIngrediente;
 
     }
 }

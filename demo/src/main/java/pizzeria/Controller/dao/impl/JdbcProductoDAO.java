@@ -5,7 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
+import javafx.css.Size;
 import pizzeria.Controller.dao.InnerProductoDAO;
 import pizzeria.Modelo.Bebida;
 import pizzeria.Modelo.Conexion;
@@ -13,6 +16,8 @@ import pizzeria.Modelo.Ingredientes;
 import pizzeria.Modelo.Pasta;
 import pizzeria.Modelo.Pizza;
 import pizzeria.Modelo.Producto;
+import pizzeria.Modelo.SizeApp;
+
 import static pizzeria.utils.DatabaseConfig.*;
 import pizzeria.Modelo.Tipo;
 
@@ -115,32 +120,45 @@ public class JdbcProductoDAO implements InnerProductoDAO {
     }
 
     @Override
-    public void getAllProductos() throws SQLException, ClassNotFoundException {
+    public List<Producto> getAllProductos() throws SQLException, ClassNotFoundException {
 
+        List<Producto> listaProductos = new ArrayList<Producto>();
         try (Connection con = new Conexion().getConexion();
                 Statement statement = con.createStatement();
                 PreparedStatement preparedStatement = con.prepareStatement(SELECT_ALL_PRODUCTO)) {
- 
-             try (ResultSet resultado =  preparedStatement.executeQuery(); ) {
-                 
- 
-                  if(resultado.next()){
-                        
+
+            try (ResultSet resultado = preparedStatement.executeQuery();) {
+                while (resultado.next()) {
                     int idProducto = resultado.getInt("id");
-                    String nombre =   resultado.getString("nombre"); 
-                    Double precio =  resultado.getDouble("precio"); 
-                    
-                     
-                  }
-                 
-             } catch (Exception e) {
-                // TODO: handle exception
-             }
+                    String nombre = resultado.getString("nombre");
+                    Double precio = resultado.getDouble("precio");
+                    SizeApp size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
+                    Tipo tipo = Tipo.valueOf(resultado.getString("tipo").toUpperCase());
+                    List<Ingredientes> listaIngredientes = new ArrayList<Ingredientes>();
 
+                    switch (tipo.getValue()) {
+                        case "pasta":
+                            listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
+                            listaProductos.add(new Pasta(idProducto, nombre, precio, listaIngredientes));
 
-            preparedStatement.executeUpdate();
+                            break;
+                        case "pizza":
+                            listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
+                            listaProductos.add(new Pizza(idProducto, nombre, precio, size, listaIngredientes));
+                            break;
+                        case "bebida":
+                            listaProductos.add(new Bebida(idProducto, nombre, precio, size));
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+            }
 
         }
+
+        return listaProductos;
 
     }
 

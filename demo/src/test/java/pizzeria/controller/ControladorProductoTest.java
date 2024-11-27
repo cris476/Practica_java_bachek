@@ -26,11 +26,21 @@ public class ControladorProductoTest {
     @Test
     void testRegistrarProducto() throws ClassNotFoundException, SQLException {
 
-        List<Alergeno> alergenosPizza = new ArrayList<Alergeno>();
-        alergenosPizza.add(new Alergeno("Pelizilina"));
+        List<Alergeno> alergenosTomate = new ArrayList<>();
+        alergenosTomate.add(new Alergeno("Pelizilina"));
+        alergenosTomate.add(new Alergeno("Gluten"));
+        alergenosTomate.add(new Alergeno("Lactosa"));
+        alergenosTomate.add(new Alergeno("Frutos secos"));
 
-        List<Ingredientes> ingredientesPizza = new ArrayList<Ingredientes>();
-        ingredientesPizza.add(new Ingredientes("Tomate8", alergenosPizza));
+        List<Alergeno> alergenosQueso = new ArrayList<>();
+        alergenosQueso.add(new Alergeno("leche"));
+        alergenosQueso.add(new Alergeno("leche1"));
+        alergenosQueso.add(new Alergeno("leche2"));
+
+        List<Ingredientes> ingredientesPizza = new ArrayList<>();
+        ingredientesPizza.add(new Ingredientes("Tomate10", alergenosTomate));
+        ingredientesPizza.add(new Ingredientes("Queso Mozzarella", alergenosQueso));
+        ingredientesPizza.add(new Ingredientes("Peperonni", alergenosQueso));
 
         Pizza pizza = new Pizza("Peperonni", 15, SizeApp.MEDIANO, ingredientesPizza);
 
@@ -38,12 +48,17 @@ public class ControladorProductoTest {
     }
 }
 
-
-/* 
+/*
  * 
- * java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a child row: a foreign key constraint fails (`pizzeria`.`ingrediente_alergeno`, CONSTRAINT `ingrediente_alergeno_ibfk_1` FOREIGN KEY (`id_ingrediente`) REFERENCES `ingrediente` (`ID`) ON DELETE CASCADE)
-
-
- java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a child row: a foreign key constraint fails (`pizzeria`.`ingrediente_alergeno`, CONSTRAINT `ingrediente_alergeno_ibfk_1` FOREIGN KEY (`id_ingrediente`) REFERENCES `ingrediente` (`ID`) ON DELETE CASCADE)
-
+ * java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a
+ * child row: a foreign key constraint fails (`pizzeria`.`ingrediente_alergeno`,
+ * CONSTRAINT `ingrediente_alergeno_ibfk_1` FOREIGN KEY (`id_ingrediente`)
+ * REFERENCES `ingrediente` (`ID`) ON DELETE CASCADE)
+ * 
+ * 
+ * java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a
+ * child row: a foreign key constraint fails (`pizzeria`.`ingrediente_alergeno`,
+ * CONSTRAINT `ingrediente_alergeno_ibfk_1` FOREIGN KEY (`id_ingrediente`)
+ * REFERENCES `ingrediente` (`ID`) ON DELETE CASCADE)
+ * 
  */

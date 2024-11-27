@@ -9,10 +9,14 @@ public class LineaPedido {
     private int id;
     private int cantidad;
     private Producto producto;
-    static int contador = 0;
+
+    public LineaPedido(int id, int cantidad, Producto producto) {
+        this.id = id;
+        this.cantidad = cantidad;
+        this.producto = producto;
+    }
 
     public LineaPedido(int cantidad, Producto producto) {
-        this.id = this.contador++;
         this.cantidad = cantidad;
         this.producto = producto;
     }

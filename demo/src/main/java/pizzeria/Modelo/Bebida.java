@@ -6,10 +6,15 @@ public class Bebida extends Producto {
 
     private SizeApp size;
 
+    public Bebida(int id, String nombre, double precio, SizeApp size) {
+        super(id, nombre, precio);
+        this.size = size;
+
+    }
+
     public Bebida(String nombre, double precio, SizeApp size) {
         super(nombre, precio);
         this.size = size;
-        // TODO Auto-generated constructor stub
     }
 
     public SizeApp getSize() {
@@ -24,8 +29,5 @@ public class Bebida extends Producto {
     public String toString() {
         return "Bebida [id=" + id + ", size=" + size + ", nombre=" + nombre + ", precio=" + precio + "]";
     }
-
-    
-    
 
 }

@@ -85,15 +85,14 @@ public class JdbcAlergeno implements InnerAlergeno {
 
     }
 
-    public List<Alergeno> getAllAlergenoByidIngrediente(int id_ingrediente)
+    public List<Alergeno> getAllAlergenoByidIngrediente(Connection con, int id_ingrediente)
             throws SQLException, ClassNotFoundException {
         List<Alergeno> alergenos = new ArrayList<Alergeno>();
-        try (Connection con = new Conexion().getConexion();
-                PreparedStatement preparedStatement = con.prepareStatement(SELECT_INGREDIENTE_ALERGENO);) {
+        try (PreparedStatement preparedStatement = con.prepareStatement(SELECT_INGREDIENTE_ALERGENO);) {
             preparedStatement.setInt(1, id_ingrediente);
             try (ResultSet resultado = preparedStatement.executeQuery()) {
 
-                if (resultado.next()) {
+                while(resultado.next()) {
                     int idAlergeno = resultado.getInt("id");
                     String nombreAlergeno = resultado.getString("nombre");
                     alergenos.add(new Alergeno(idAlergeno, nombreAlergeno));
@@ -102,7 +101,7 @@ public class JdbcAlergeno implements InnerAlergeno {
             }
             return alergenos;
 
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             throw e;
         }
 

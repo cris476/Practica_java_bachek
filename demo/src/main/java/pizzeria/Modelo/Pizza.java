@@ -7,6 +7,13 @@ public class Pizza extends Producto {
     private SizeApp size;
     private List<Ingredientes> ingredientes;
 
+ 
+    public Pizza( int id ,  String nombre, double precio, SizeApp size, List<Ingredientes> ingredientes) {
+        super(id , nombre, precio);
+        this.size = size;
+        this.ingredientes = ingredientes;
+    }
+
     public Pizza(String nombre, double precio, SizeApp size, List<Ingredientes> ingredientes) {
         super(nombre, precio);
         this.size = size;
