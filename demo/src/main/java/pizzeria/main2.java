@@ -4,6 +4,7 @@ import static pizzeria.utils.DatabaseConfig.CREATE_ALL_TABLES;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import pizzeria.Controller.ContraladorCliente;
@@ -23,11 +24,11 @@ public class main2 {
         public static void main(String[] args) {
 
                 try {
-                        CREATE_ALL_TABLES();
+                CREATE_ALL_TABLES();
                 } catch (Exception e) {
-                        // TODO: handle exception
+                // TODO: handle exception
                 }
-
+                System.out.println(new Date().toString());
                 System.out.println(Tipo.PIZZA.getValue());
                 System.err.println(SizeApp.valueOf("GRANDE"));
         }

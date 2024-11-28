@@ -15,6 +15,9 @@ public class DatabaseConfig {
       public static final String INSERT_INGREDIENTE = "INSERT INTO INGREDIENTE (nombre) VALUES (?)";
       public static final String INSERT_INGREDIENTE_ALERGENO = "INSERT INTO  ingrediente_alergeno (id_ingrediente , id_alergeno) VALUES (?,?)";
       public static final String INSERT_ALERGENO = "INSERT INTO  ALERGENO (nombre) VALUES (?)";
+      public static final String INSERT_LINEAPEDIDO = "INSERT INTO lineapedido(cantidad, id_producto, id_pedido) VALUES (?, ?, ?)";
+
+      public static final String INSERT_PEDIDO = "INSERT INTO pedido(fecha , cliente_id, estadopedido) VALUES (?,?,?)";
 
       public static final String SELECT_INGREDIENTE_ALERGENO = "select  alergeno.id , alergeno.nombre from  ingrediente inner join  \n"
                   + //
@@ -37,6 +40,7 @@ public class DatabaseConfig {
       public static final String SELECT_LOGIN_CLIENTE = "SELECT * FROM cliente WHERE nombre = ? AND password = ?";
       public static final String SELECT_ALL_CLIENTE = "SELECT id , dni , nombre , direccion , email , password , admin , telefono FROM cliente ";
       public static final String SELECT_ALL_PRODUCT = "SELECT id  , nombre , precio , tipo FROM producto";
+      public static final String SELECT_LINEAPEDIDO_BY_ID = "SELECT * FROM PEDIDO  INNER JOIN  lineapedido ON pedido.id =  lineapedido.id_pedido";
 
       public static final String UPDATE_CLIENTE = "UPDATE cliente SET nombre = ? ,  ";
 
@@ -110,10 +114,21 @@ public class DatabaseConfig {
       public static final String CREATE_TABLE_LINEAPEDIDO = " CREATE TABLE LineaPedido (\n" + //
                   "    id INT NOT NULL AUTO_INCREMENT,\n" + //
                   "    cantidad INT NOT NULL,\n" + //
-                  "    id_producto INT NOT NULL, \n" + //
-                  "      PRIMARY KEY (id), \n" + //
-                  "      CONSTRAINT fk_lineapedido_producto FOREIGN KEY (id_producto) REFERENCES Producto(id) ON DELETE CASCADE\n"
+                  "    id_producto INT NOT NULL,\n" + //
+                  "    id_pedido INT NOT NULL,\n" + //
+                  "    PRIMARY KEY (id),\n" + //
+                  "    CONSTRAINT fk_lineapedido_producto FOREIGN KEY (id_producto) REFERENCES Producto(id) ON DELETE CASCADE,\n"
                   + //
+                  "    CONSTRAINT fk_lineapedido_pedido FOREIGN KEY (id_pedido) REFERENCES Pedido(id) ON DELETE CASCADE\n"
+                  + //
+                  ");";
+
+      public static final String CREATE_TABLE_PEDIDO = " CREATE TABLE Pedido (\n" + //
+                  "    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,\n" + //
+                  "    fecha DATE,\n" +
+                  "    estadopedido ENUM('ENTREGADO', 'PENDIENTE', 'CANCELADO'),\n" +
+                  "    cliente_id INT,\n" + //
+                  "    FOREIGN KEY (cliente_id) REFERENCES Cliente(id)\n" + //
                   ");";
 
       public static void CREATE_ALL_TABLES() throws ClassNotFoundException, SQLException {
@@ -129,6 +144,7 @@ public class DatabaseConfig {
                   stmt.execute(DROP_INGREDIENTE);
                   stmt.execute(DROP_PRODUCTO);
                   stmt.execute(DROP_TABLE_CLIENTE);
+                  stmt.execute(DROP_PEDIDO);
 
                   stmt.execute(CREATE_TABLE_CLIENTE);
                   stmt.execute(CREATE_TABLE_PRODUCTO);
@@ -137,6 +153,7 @@ public class DatabaseConfig {
                   stmt.execute(CREATE_TABLE_ALERGENO);
                   stmt.execute(CREATE_TABLE_PRODUCTO_INGREDIENTE);
                   stmt.execute(CREATE_TABLE_INGREDIENTE_ALERGENO);
+                  stmt.execute(CREATE_TABLE_PEDIDO);
 
                   stmt.execute("SET FOREIGN_KEY_CHECKS = 1");
 
