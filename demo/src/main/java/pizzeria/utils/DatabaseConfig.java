@@ -37,10 +37,19 @@ public class DatabaseConfig {
       public static final String SELECT_ALERGENO_NOMBRE = "SELECT id , nombre FROM  alergeno where nombre = ?";
       public static final String SELECT_INGREDIENTE_NOMBRE = "SELECT id , nombre FROM  ingrediente where nombre = ?";
       public static final String SELECT_ALL_PRODUCTO = "SELECT * from producto";
+      public static final String SELECT_ALL_PRODUCTO_ID = "SELECT * from producto where id=?";
       public static final String SELECT_LOGIN_CLIENTE = "SELECT * FROM cliente WHERE nombre = ? AND password = ?";
       public static final String SELECT_ALL_CLIENTE = "SELECT id , dni , nombre , direccion , email , password , admin , telefono FROM cliente ";
       public static final String SELECT_ALL_PRODUCT = "SELECT id  , nombre , precio , tipo FROM producto";
-      public static final String SELECT_LINEAPEDIDO_BY_ID = "SELECT * FROM PEDIDO  INNER JOIN  lineapedido ON pedido.id =  lineapedido.id_pedido";
+      public static final String SELECT_LINEAPEDIDO_BY_ID = "SELECT lineapedido.* FROM PEDIDO  INNER JOIN  lineapedido ON pedido.id =  lineapedido.id_pedido  where lineapedido.id_pedido = ?";
+      public static final String SELECT_PEDIDO_ESTADO = "select pedido.* , lineapedido.id_producto from pedido  join lineapedido  on pedido.id = lineapedido.id_pedido where pedido.estadopedido = ? ";
+      public static final String SELECT_PEDIDO_ID = "select  *  from pedido  join lineapedido  on pedido.id = lineapedido.id_pedido where  pedido.cliente_id = ?";
+      public static final String SELECT_PRODUCTO_NAME_SIZE = "SELECT * FROM producto\n" + //
+                  "WHERE producto.nombre = 'cococolo'\n" + //
+                  "AND (\n" + //
+                  "    producto.size = COALESCE(?, producto.size)\n" + //
+                  "    OR (? IS NULL AND producto.size IS NULL)\n" + //
+                  ");";
 
       public static final String UPDATE_CLIENTE = "UPDATE cliente SET nombre = ? ,  ";
 

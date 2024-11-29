@@ -31,12 +31,12 @@ public class ControladorClienteTest {
 
     @Test
     void testInsertarCliente() throws ClassNotFoundException, SQLException, ExceptionFoundCliente {
-        String dni = "48642965N";
-        String nombre = "Jhon";
-        String apellido = "Solano Macas";
-        String telefono = "681207536";
-        String email = "solanomacascristofer@gmail.com";
-        String password = "12345";
+        String dni = "48642963N";
+        String nombre = "Jhon2";
+        String apellido = "Solano Macass";
+        String telefono = "681207536e";
+        String email = "solanomacascristoferr@gmail.com";
+        String password = "123453";
         Boolean admin = false;
 
         Cliente cliente = new Cliente(dni, nombre, apellido, telefono, email, password, admin);

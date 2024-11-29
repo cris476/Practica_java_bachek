@@ -11,13 +11,21 @@ public class Pedido {
     private List<LineaPedido> listaLineaPedidos;
     private Cliente cliente;
 
-    public Pedido(int id, Date fecha, float precioTotal, EstadoPedido estado, List<LineaPedido> listaLineaPedidos,
+    public Pedido(int id, Date fecha, EstadoPedido estado, List<LineaPedido> listaLineaPedidos,
             Cliente cliente) {
         this.id = id;
         this.fecha = fecha;
         this.estado = estado;
         this.listaLineaPedidos = listaLineaPedidos;
         this.cliente = cliente;
+    }
+
+    public Pedido(int id, Date fecha, EstadoPedido estado, List<LineaPedido> listaLineaPedidos) {
+        this.id = id;
+        this.fecha = fecha;
+        this.estado = estado;
+        this.listaLineaPedidos = listaLineaPedidos;
+
     }
 
     public Pedido(Date fecha, EstadoPedido estado, List<LineaPedido> listaLineaPedidos,

@@ -11,6 +11,6 @@ public interface InnerLineaPedidoDAO {
     public void save(Connection con, int idProducto, int idPedido, int cantidad)
             throws SQLException, ClassNotFoundException;
 
-    public List<LineaPedido> getAllLineaPedido(int idPedido) throws SQLException, ClassNotFoundException;
+    public List<LineaPedido> getAllLineaPedidonbyID(int idPedido) throws SQLException, ClassNotFoundException;
 
 }

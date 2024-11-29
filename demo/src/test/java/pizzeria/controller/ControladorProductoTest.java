@@ -11,6 +11,7 @@ import pizzeria.Controller.ContraladorCliente;
 import pizzeria.Controller.ControladorProducto;
 import pizzeria.Modelo.Alergeno;
 import pizzeria.Modelo.Ingredientes;
+import pizzeria.Modelo.Pasta;
 import pizzeria.Modelo.Pizza;
 import pizzeria.Modelo.SizeApp;
 
@@ -42,9 +43,11 @@ public class ControladorProductoTest {
         ingredientesPizza.add(new Ingredientes("Queso Mozzarella", alergenosQueso));
         ingredientesPizza.add(new Ingredientes("Peperonni", alergenosQueso));
 
-        Pizza pizza = new Pizza("Peperonni", 15, SizeApp.MEDIANO, ingredientesPizza);
+        Pizza pizza = new Pizza("Peperonni", 15, SizeApp.GRANDE, ingredientesPizza);
 
-        controladorProducto.registrarProducto(pizza);
+        Pasta pasta = new Pasta("cococolo", 12.3, ingredientesPizza);
+
+        controladorProducto.registrarProducto(pasta);
     }
 }
 
