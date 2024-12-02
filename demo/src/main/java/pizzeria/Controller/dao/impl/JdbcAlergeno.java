@@ -5,6 +5,7 @@ import static pizzeria.utils.DatabaseConfig.INSERT_INGREDIENTE_ALERGENO;
 import static pizzeria.utils.DatabaseConfig.SELECT_ALERGENO_ID;
 import static pizzeria.utils.DatabaseConfig.SELECT_ALERGENO_NOMBRE;
 import static pizzeria.utils.DatabaseConfig.SELECT_INGREDIENTE_ALERGENO;
+import static pizzeria.utils.DatabaseConfig.SELECT_INGREDIENTE_ALERGENO_EXIST;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -43,15 +44,19 @@ public class JdbcAlergeno implements InnerAlergeno {
         }
     }
 
-    public void relacionIngredienteAlergeno(Connection con, int id_ingrediente, int id_alergeno) throws SQLException {
+    public void relacionIngredienteAlergeno(Connection con, int id_ingrediente, int id_alergeno)
+            throws SQLException, ClassNotFoundException {
+        con.setAutoCommit(false);
+        if (!relacionIngredienteAlergenoExits(id_ingrediente, id_alergeno)) {
+            try (PreparedStatement preparedStatement2 = con.prepareStatement(INSERT_INGREDIENTE_ALERGENO)) {
 
-        try (PreparedStatement preparedStatement2 = con.prepareStatement(INSERT_INGREDIENTE_ALERGENO)) {
-            con.setAutoCommit(false);
-            preparedStatement2.setInt(1, id_ingrediente);
-            preparedStatement2.setInt(2, id_alergeno);
-            preparedStatement2.executeUpdate();
-            con.commit();
+                preparedStatement2.setInt(1, id_ingrediente);
+                preparedStatement2.setInt(2, id_alergeno);
+                preparedStatement2.executeUpdate();
+                con.commit();
+            }
         }
+
     }
 
     @Override
@@ -92,7 +97,7 @@ public class JdbcAlergeno implements InnerAlergeno {
             preparedStatement.setInt(1, id_ingrediente);
             try (ResultSet resultado = preparedStatement.executeQuery()) {
 
-                while(resultado.next()) {
+                while (resultado.next()) {
                     int idAlergeno = resultado.getInt("id");
                     String nombreAlergeno = resultado.getString("nombre");
                     alergenos.add(new Alergeno(idAlergeno, nombreAlergeno));
@@ -105,6 +110,28 @@ public class JdbcAlergeno implements InnerAlergeno {
             throw e;
         }
 
+    }
+
+    public boolean relacionIngredienteAlergenoExits(int id_ingrediente, int id_alergeno)
+            throws SQLException, ClassNotFoundException {
+        int id = 0;
+        try (
+                Connection con = new Conexion().getConexion();
+                PreparedStatement preparedStatement = con.prepareStatement(SELECT_INGREDIENTE_ALERGENO_EXIST);) {
+
+            preparedStatement.setInt(1, id_ingrediente);
+            preparedStatement.setInt(2, id_alergeno);
+
+            try (ResultSet resultado = preparedStatement.executeQuery()) {
+
+                if (resultado.next()) {
+                    id = resultado.getInt("id");
+                }
+
+            }
+
+            return id != 0;
+        }
     }
 
     @Override

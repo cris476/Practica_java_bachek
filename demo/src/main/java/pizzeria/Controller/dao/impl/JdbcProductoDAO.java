@@ -37,13 +37,11 @@ public class JdbcProductoDAO implements InnerProductoDAO {
                     Pizza pizza = (Pizza) producto;
                     if (pizza.getIngredientes() != null && pizza.getIngredientes().size() >= 0) {
                         for (Ingredientes ingrediente : pizza.getIngredientes()) {
-
-                            Ingredientes ingredienteEncontrado = jdbcIngredienteDAO
-                                    .findByName(ingrediente.getNombre());
+                            Ingredientes ingredienteEncontrado = jdbcIngredienteDAO.findByName(ingrediente.getNombre());
                             if (ingredienteEncontrado == null) {
-                                insertarIngredienteYRelacion(con, idProducto, ingrediente);
+                                jdbcIngredienteDAO.relacionProductoIngrediente(con, idProducto, ingredienteEncontrado);
                             } else {
-                                jdbcIngredienteDAO.saveWithIngrediente(con, idProducto, ingredienteEncontrado);
+                                insertarIngredienteYRelacion(con, idProducto, ingrediente);
                             }
                         }
                     }
@@ -52,7 +50,12 @@ public class JdbcProductoDAO implements InnerProductoDAO {
                     Pasta pasta = (Pasta) producto;
                     if (pasta.getIngredientes() != null && pasta.getIngredientes().size() >= 0) {
                         for (Ingredientes ingrediente : pasta.getIngredientes()) {
-                            insertarIngredienteYRelacion(con, idProducto, ingrediente);
+                            Ingredientes ingredienteEncontrado = jdbcIngredienteDAO.findByName(ingrediente.getNombre());
+                            if (ingredienteEncontrado == null) {
+                                insertarIngredienteYRelacion(con, idProducto, ingrediente);
+                            } else {
+                                jdbcIngredienteDAO.relacionProductoIngrediente(con, idProducto, ingredienteEncontrado);
+                            }
                         }
                     }
                 }
@@ -61,8 +64,6 @@ public class JdbcProductoDAO implements InnerProductoDAO {
                 con.rollback();
                 throw e;
             }
-            // }
-
         }
     }
 
@@ -148,14 +149,9 @@ public class JdbcProductoDAO implements InnerProductoDAO {
         return productoEncontrado;
     }
 
-    // public <T extends Producto> void pppp(T e) {
-    // e.mostrarDetalles();
-    // }
-
     private void insertarIngredienteYRelacion(Connection con, int idProducto, Ingredientes ingrediente)
             throws SQLException, ClassNotFoundException {
-        JdbcIngredienteDAO ingredienteDAO = new JdbcIngredienteDAO();
-        ingredienteDAO.save(con, idProducto, ingrediente);
+        jdbcIngredienteDAO.save(con, idProducto, ingrediente);
     }
 
     private void savePizza(PreparedStatement preparedStatement, Pizza pizza)
@@ -196,10 +192,10 @@ public class JdbcProductoDAO implements InnerProductoDAO {
 
             try (ResultSet resultado = preparedStatement.executeQuery();) {
                 while (resultado.next()) {
+                    SizeApp size;
                     int idProducto = resultado.getInt("id");
                     String nombre = resultado.getString("nombre");
                     Double precio = resultado.getDouble("precio");
-                    SizeApp size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
                     Tipo tipo = Tipo.valueOf(resultado.getString("tipo").toUpperCase());
                     List<Ingredientes> listaIngredientes = new ArrayList<Ingredientes>();
 
@@ -210,10 +206,12 @@ public class JdbcProductoDAO implements InnerProductoDAO {
 
                             break;
                         case "pizza":
+                            size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
                             listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
                             listaProductos.add(new Pizza(idProducto, nombre, precio, size, listaIngredientes));
                             break;
                         case "bebida":
+                            size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
                             listaProductos.add(new Bebida(idProducto, nombre, precio, size));
                             break;
                         default:

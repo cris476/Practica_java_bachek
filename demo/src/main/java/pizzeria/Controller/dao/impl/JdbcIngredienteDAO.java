@@ -36,14 +36,13 @@ public class JdbcIngredienteDAO implements InnerIngredienteDAO {
                     jdbcAlergeno.save(con, id_ingrediente, alergeno);
                 } else {
                     jdbcAlergeno.relacionIngredienteAlergeno(con, id_ingrediente, alergenoExiste.getId());
-
                 }
             }
         }
         con.commit();
     }
 
-    public void saveWithIngrediente(Connection con, int id_producto, Ingredientes ingrediente)
+    public void relacionProductoIngrediente(Connection con, int id_producto, Ingredientes ingrediente)
             throws SQLException, ClassNotFoundException {
 
         con.setAutoCommit(false);
@@ -72,11 +71,36 @@ public class JdbcIngredienteDAO implements InnerIngredienteDAO {
         return idIngrediente;
     }
 
-    public void insertarProductoIngrediente(Connection con, int id_producto, int id_ingrediente) throws SQLException {
-        try (PreparedStatement preparedStatement = con.prepareStatement(INSERT_PRODUCTO_iNGREDIENTE)) {
+    public void insertarProductoIngrediente(Connection con, int id_producto, int id_ingrediente)
+            throws SQLException, ClassNotFoundException {
+
+        if (!relacionProductoIngredienteExits(id_producto, id_ingrediente)) {
+            try (PreparedStatement preparedStatement = con.prepareStatement(INSERT_PRODUCTO_iNGREDIENTE)) {
+                preparedStatement.setInt(1, id_producto);
+                preparedStatement.setInt(2, id_ingrediente);
+                preparedStatement.executeUpdate();
+            }
+        }
+    }
+
+    public boolean relacionProductoIngredienteExits(int id_producto, int id_ingrediente)
+            throws SQLException, ClassNotFoundException {
+        int id = 0;
+        try (
+                Connection con = new Conexion().getConexion();
+                PreparedStatement preparedStatement = con.prepareStatement(SELECT_PRODUCTO_INGREDIENTE_EXIST);) {
+
             preparedStatement.setInt(1, id_producto);
             preparedStatement.setInt(2, id_ingrediente);
-            preparedStatement.executeUpdate();
+
+            try (ResultSet resultado = preparedStatement.executeQuery()) {
+
+                if (resultado.next()) {
+                    id = resultado.getInt("id");
+                }
+
+            }
+            return id != 0;
         }
     }
 
@@ -131,4 +155,5 @@ public class JdbcIngredienteDAO implements InnerIngredienteDAO {
         return listaIngrediente;
 
     }
+
 }

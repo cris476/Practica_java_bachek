@@ -44,6 +44,8 @@ public class DatabaseConfig {
       public static final String SELECT_LINEAPEDIDO_BY_ID = "SELECT lineapedido.* FROM PEDIDO  INNER JOIN  lineapedido ON pedido.id =  lineapedido.id_pedido  where lineapedido.id_pedido = ?";
       public static final String SELECT_PEDIDO_ESTADO = "select pedido.* , lineapedido.id_producto from pedido  join lineapedido  on pedido.id = lineapedido.id_pedido where pedido.estadopedido = ? ";
       public static final String SELECT_PEDIDO_ID = "select  *  from pedido  join lineapedido  on pedido.id = lineapedido.id_pedido where  pedido.cliente_id = ?";
+      public static final String SELECT_INGREDIENTE_ALERGENO_EXIST = "select  * from  ingrediente_alergeno where ingrediente_alergeno.id_ingrediente = ? and  ingrediente_alergeno.id_alergeno = ? ;";
+      public static final String SELECT_PRODUCTO_INGREDIENTE_EXIST = "select * from producto_ingrediente where id_producto = ? and id_ingrediente = ? ";
       public static final String SELECT_PRODUCTO_NAME_SIZE = "SELECT * FROM producto\n" + //
                   "WHERE producto.nombre = 'cococolo'\n" + //
                   "AND (\n" + //
@@ -92,16 +94,18 @@ public class DatabaseConfig {
                   ");\r\n" + //
                   " ";
 
-      public static final String CREATE_TABLE_PRODUCTO_INGREDIENTE = "CREATE TABLE producto_ingrediente (\n" + //
-                  "  id_producto INT NOT NULL,\n" + //
-                  "  id_ingrediente INT NOT NULL,\n" + //
-                  "  PRIMARY KEY (id_producto, id_ingrediente),\n" + //
-                  "  KEY producto_ingrediente_ibfk_2 (id_ingrediente),\n" + //
-                  "  CONSTRAINT producto_ingrediente_ibfk_1 FOREIGN KEY (id_producto) REFERENCES producto (id) ON DELETE CASCADE,\n"
+      public static final String CREATE_TABLE_PRODUCTO_INGREDIENTE = "CREATE TABLE producto_ingrediente (\r\n" + //
+                  "  id INT NOT NULL AUTO_INCREMENT,\r\n" + //
+                  "  id_producto INT NOT NULL,\r\n" + //
+                  "  id_ingrediente INT NOT NULL,\r\n" + //
+                  "  PRIMARY KEY (id),\r\n" + //
+                  "  KEY producto_ingrediente_ibfk_2 (id_ingrediente),\r\n" + //
+                  "  CONSTRAINT producto_ingrediente_ibfk_1 FOREIGN KEY (id_producto) REFERENCES producto (id) ON DELETE CASCADE,\r\n"
                   + //
-                  "  CONSTRAINT producto_ingrediente_ibfk_2 FOREIGN KEY (id_ingrediente) REFERENCES ingrediente (ID) ON DELETE CASCADE\n"
+                  "  CONSTRAINT producto_ingrediente_ibfk_2 FOREIGN KEY (id_ingrediente) REFERENCES ingrediente (ID) ON DELETE CASCADE\r\n"
                   + //
-                  "); ";
+                  ");\r\n" + //
+                  "";
 
       public static final String CREATE_TABLE_ALERGENO = "CREATE TABLE alergeno (\n" + //
                   "  ID INT NOT NULL AUTO_INCREMENT,\n" + //
@@ -109,16 +113,18 @@ public class DatabaseConfig {
                   "  PRIMARY KEY (ID)\n" + //
                   ");";
 
-      public static final String CREATE_TABLE_INGREDIENTE_ALERGENO = " CREATE TABLE ingrediente_alergeno (\n" + //
-                  "        id_ingrediente INT NOT NULL,\n" + //
-                  "        id_alergeno INT NOT NULL,\n" + //
-                  "        PRIMARY KEY (id_ingrediente, id_alergeno),\n" + //
-                  "        KEY ingrediente_alergeno_ibfk_2 (id_alergeno),\n" + //
-                  "        CONSTRAINT ingrediente_alergeno_ibfk_1 FOREIGN KEY (id_ingrediente) REFERENCES ingrediente (ID) ON DELETE CASCADE,\n"
+      public static final String CREATE_TABLE_INGREDIENTE_ALERGENO = "CREATE TABLE ingrediente_alergeno (\n" + //
+                  "    id INT NOT NULL AUTO_INCREMENT,\n" + //
+                  "    id_ingrediente INT NOT NULL,\n" + //
+                  "    id_alergeno INT NOT NULL,\n" + //
+                  "    PRIMARY KEY (id),\n" + //
+                  "    UNIQUE KEY (id_ingrediente, id_alergeno),\n" + //
+                  "    KEY ingrediente_alergeno_ibfk_2 (id_alergeno),\n" + //
+                  "    CONSTRAINT ingrediente_alergeno_ibfk_1 FOREIGN KEY (id_ingrediente) REFERENCES ingrediente (ID) ON DELETE CASCADE,\n"
                   + //
-                  "        CONSTRAINT ingrediente_alergeno_ibfk_2 FOREIGN KEY (id_alergeno) REFERENCES alergeno (ID) ON DELETE CASCADE\n"
+                  "    CONSTRAINT ingrediente_alergeno_ibfk_2 FOREIGN KEY (id_alergeno) REFERENCES alergeno (ID) ON DELETE CASCADE\n"
                   + //
-                  "    )";
+                  ");";
 
       public static final String CREATE_TABLE_LINEAPEDIDO = " CREATE TABLE LineaPedido (\n" + //
                   "    id INT NOT NULL AUTO_INCREMENT,\n" + //

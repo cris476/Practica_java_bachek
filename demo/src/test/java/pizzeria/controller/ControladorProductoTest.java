@@ -18,7 +18,7 @@ import pizzeria.Modelo.SizeApp;
 public class ControladorProductoTest {
 
     ControladorProducto controladorProducto;
-
+    
     @BeforeEach
     void setUp() throws ClassNotFoundException, SQLException {
         controladorProducto = new ControladorProducto();
