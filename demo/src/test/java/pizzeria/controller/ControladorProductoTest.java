@@ -51,17 +51,3 @@ public class ControladorProductoTest {
     }
 }
 
-/*
- * 
- * java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a
- * child row: a foreign key constraint fails (`pizzeria`.`ingrediente_alergeno`,
- * CONSTRAINT `ingrediente_alergeno_ibfk_1` FOREIGN KEY (`id_ingrediente`)
- * REFERENCES `ingrediente` (`ID`) ON DELETE CASCADE)
- * 
- * 
- * java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a
- * child row: a foreign key constraint fails (`pizzeria`.`ingrediente_alergeno`,
- * CONSTRAINT `ingrediente_alergeno_ibfk_1` FOREIGN KEY (`id_ingrediente`)
- * REFERENCES `ingrediente` (`ID`) ON DELETE CASCADE)
- * 
- */

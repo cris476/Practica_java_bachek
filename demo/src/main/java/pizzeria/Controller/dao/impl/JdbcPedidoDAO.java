@@ -19,6 +19,7 @@ import pizzeria.Modelo.EstadoPedido;
 import pizzeria.Modelo.LineaPedido;
 import pizzeria.Modelo.Pedido;
 import pizzeria.Modelo.Producto;
+import pizzeria.Controller.dao.impl.JdbcLineaPedido;
 
 public class JdbcPedidoDAO implements InnerPedido {
 

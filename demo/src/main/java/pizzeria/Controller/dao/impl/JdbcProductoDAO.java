@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import pizzeria.Controller.dao.InnerProductoDAO;
@@ -39,9 +38,9 @@ public class JdbcProductoDAO implements InnerProductoDAO {
                         for (Ingredientes ingrediente : pizza.getIngredientes()) {
                             Ingredientes ingredienteEncontrado = jdbcIngredienteDAO.findByName(ingrediente.getNombre());
                             if (ingredienteEncontrado == null) {
-                                jdbcIngredienteDAO.relacionProductoIngrediente(con, idProducto, ingredienteEncontrado);
-                            } else {
                                 insertarIngredienteYRelacion(con, idProducto, ingrediente);
+                            } else {
+                                jdbcIngredienteDAO.relacionProductoIngrediente(con, idProducto, ingrediente);
                             }
                         }
                     }
@@ -269,29 +268,5 @@ public class JdbcProductoDAO implements InnerProductoDAO {
         return producto;
 
     }
-
-    // public HashMap<String, Object> getProductoByTipo(String tipo) {
-    // HashMap<String , On>
-
-    // switch (tipo) {
-    // case "pasta":
-    // listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con,
-    // idProducto);
-    // producto = new Pasta(idProducto, nombre, precio, listaIngredientes);
-
-    // break;
-    // case "pizza":
-    // listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con,
-    // idProducto);
-    // producto = new Pizza(idProducto, nombre, precio, size, listaIngredientes);
-    // break;
-    // case "bebida":
-    // producto = new Bebida(idProducto, nombre, precio, size);
-    // break;
-    // default:
-    // break;
-    // }
-
-    // }
 
 }
