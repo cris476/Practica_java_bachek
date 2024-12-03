@@ -251,6 +251,7 @@ public class mainPizzeria {
                                     parte2 = false;
                                     break;
                                 case "3":
+                                    productoInteresado = null;
                                     productos = controladorProducto.getAllProducts();
 
                                     for (Producto productoItem : productos) {
@@ -261,13 +262,13 @@ public class mainPizzeria {
 
                                     while (productoInteresado == null) {
                                         System.out.print("seleccione el id del  producto interesado: ");
-                                        opcion = sc.nextLine();
+                                        opcion = sc.next();
                                         productoInteresado = controladorProducto
                                                 .getProductoById(Integer.parseInt(opcion));
                                     }
 
                                     System.out.println(productoInteresado);
-                                    System.out.print("selecciona  la cantida del producto");
+                                    System.out.print("selecciona  la cantida del producto: ");
                                     cantidad = sc.nextInt();
 
                                     controladorPedido.addCarrito(productoInteresado, cantidad, cliente);

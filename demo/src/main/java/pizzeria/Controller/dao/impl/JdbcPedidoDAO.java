@@ -115,12 +115,11 @@ public class JdbcPedidoDAO implements InnerPedido {
         return listaLineaPedidos;
     }
 
-    public void addCarrito(Pedido pedido, int cantidad) throws ClassNotFoundException, SQLException {
+    public void addCarrito(Pedido pedido, Producto producto, int cantidad) throws ClassNotFoundException, SQLException {
 
-        for (LineaPedido lineaPedido : pedido.getListaLineaPedidos()) {
-            jdbcLineaPedido.save(new Conexion().getConexion(), lineaPedido.getProducto().getId(), pedido.getId(),
-                    cantidad);
-        }
+        jdbcLineaPedido.save(new Conexion().getConexion(), producto.getId(), pedido.getId(),
+                cantidad);
+
     }
 
     public void updatePedidoEstadoAndPagable(Pedido pedido, Pagable pagable)

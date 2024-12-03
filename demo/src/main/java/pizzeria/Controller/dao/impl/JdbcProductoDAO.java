@@ -229,6 +229,7 @@ public class JdbcProductoDAO implements InnerProductoDAO {
     public Producto getProductoById(int idProducto) throws SQLException, ClassNotFoundException {
 
         Producto producto = null;
+        SizeApp size ; 
         try (Connection con = new Conexion().getConexion();
                 Statement statement = con.createStatement();
                 PreparedStatement preparedStatement = con.prepareStatement(SELECT_ALL_PRODUCTO_ID)) {
@@ -239,7 +240,7 @@ public class JdbcProductoDAO implements InnerProductoDAO {
                 if (resultado.next()) {
                     String nombre = resultado.getString("nombre");
                     Double precio = resultado.getDouble("precio");
-                    SizeApp size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
+
                     Tipo tipo = Tipo.valueOf(resultado.getString("tipo").toUpperCase());
                     List<Ingredientes> listaIngredientes = new ArrayList<Ingredientes>();
 
@@ -250,10 +251,12 @@ public class JdbcProductoDAO implements InnerProductoDAO {
 
                             break;
                         case "pizza":
+                             size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
                             listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
                             producto = new Pizza(idProducto, nombre, precio, size, listaIngredientes);
                             break;
                         case "bebida":
+                             size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
                             producto = new Bebida(idProducto, nombre, precio, size);
                             break;
                         default:
