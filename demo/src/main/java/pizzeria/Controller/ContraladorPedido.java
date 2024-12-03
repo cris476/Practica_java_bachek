@@ -48,7 +48,7 @@ public class ContraladorPedido {
                 .filter(pedido -> pedido.getEstado() == EstadoPedido.PENDIENTE)
                 .findFirst()
                 .orElse(null);
-
+        pedidoPendiente.setEstado(EstadoPedido.ENTREGADO);
         jdbcPedidoDAO.updatePedidoEstadoAndPagable(pedidoPendiente, pagable);
 
     }

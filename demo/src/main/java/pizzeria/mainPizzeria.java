@@ -16,6 +16,9 @@ import pizzeria.Modelo.Alergeno;
 import pizzeria.Modelo.Bebida;
 import pizzeria.Modelo.Cliente;
 import pizzeria.Modelo.Ingredientes;
+import pizzeria.Modelo.Pagable;
+import pizzeria.Modelo.PagarEfectivo;
+import pizzeria.Modelo.PagarTarjeta;
 import pizzeria.Modelo.Pasta;
 import pizzeria.Modelo.Pizza;
 import pizzeria.Modelo.Producto;
@@ -52,6 +55,7 @@ public class mainPizzeria {
         int cantidad;
         Tipo tipo = null;
         SizeApp size = null;
+        Pagable metodoPago = null;
 
         Scanner sc = new Scanner(System.in);
 
@@ -87,10 +91,12 @@ public class mainPizzeria {
                             System.out.println();
                             System.out.println();
 
-                            System.out.println("1. Visualizar todos los Productos");
+                            System.out.println("1. visualizar todos los Productos");
                             System.out.println("2. añadir producto");
                             System.out.println("3. añadir al carrito");
-                            System.out.println("4. salir");
+                            System.out.println("4. finalizar pedido");
+                            System.out.println("5. cancelar pedido");
+                            System.out.println("6. salir");
                             System.out.print("Seleccion una opcion : ");
                             opcion = sc.nextLine();
 
@@ -275,6 +281,35 @@ public class mainPizzeria {
 
                                     break;
                                 case "4":
+                                    metodoPago = null;
+
+                                    while (metodoPago == null) {
+                                        System.out.println();
+
+                                        System.out.println("1. efectivo");
+                                        System.out.println("2. tarjeta");
+                                        System.out.print("Selecciona el metodo de pago: ");
+                                        opcion = sc.next();
+
+                                        switch (opcion) {
+                                            case "1":
+                                                metodoPago = new PagarEfectivo();
+                                                break;
+                                            case "2":
+                                                metodoPago = new PagarTarjeta();
+                                                break;
+                                            default:
+                                                System.out.println();
+                                                System.out.println("Seleccione una de las opciones mostradas");
+                                                System.out.println();
+                                                break;
+                                        }
+
+                                    }
+                                    controladorPedido.finalizarPedido(cliente, metodoPago);
+
+                                    break;
+                                case "5":
                                     parte2 = false;
                                     break;
                                 default:
