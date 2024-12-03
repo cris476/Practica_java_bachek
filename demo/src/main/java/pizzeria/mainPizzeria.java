@@ -9,6 +9,7 @@ import com.mysql.cj.xdevapi.Client;
 
 import javafx.css.Size;
 import pizzeria.Controller.ContraladorCliente;
+import pizzeria.Controller.ContraladorPedido;
 import pizzeria.Controller.ControladorProducto;
 import pizzeria.Exceptions.ExceptionFoundCliente;
 import pizzeria.Modelo.Alergeno;
@@ -46,7 +47,9 @@ public class mainPizzeria {
         String alergeno;
         List<Producto> productos;
         Producto producto = null;
+        Producto productoInteresado = null;
         Double precio;
+        int cantidad;
         Tipo tipo = null;
         SizeApp size = null;
 
@@ -54,6 +57,7 @@ public class mainPizzeria {
 
         ContraladorCliente controladorCliente = new ContraladorCliente();
         ControladorProducto controladorProducto = new ControladorProducto();
+        ContraladorPedido controladorPedido = new ContraladorPedido();
 
         while (parte1) {
 
@@ -85,7 +89,8 @@ public class mainPizzeria {
 
                             System.out.println("1. Visualizar todos los Productos");
                             System.out.println("2. añadir producto");
-                            System.out.println("3. salir");
+                            System.out.println("3. añadir al carrito");
+                            System.out.println("4. salir");
                             System.out.print("Seleccion una opcion : ");
                             opcion = sc.nextLine();
 
@@ -98,7 +103,6 @@ public class mainPizzeria {
                                     }
                                     break;
                                 case "2":
-
                                     while (tipoProducto) {
 
                                         System.out.println("1. pizza");
@@ -128,7 +132,7 @@ public class mainPizzeria {
 
                                     }
 
-                                    while (añadirIngrediente) {
+                                    while (añadirIngrediente && Tipo.BEBIDA != tipo) {
 
                                         while (añadirAlergeno) {
                                             System.out.println();
@@ -175,7 +179,7 @@ public class mainPizzeria {
                                                 System.out.println("2. medio");
                                                 System.out.println("3. pequeño");
                                                 System.out.print("Selecciona el tamaño del producto");
-                                                opcion = sc.nextLine();
+                                                opcion = sc.next();
 
                                                 switch (opcion) {
                                                     case "1":
@@ -247,6 +251,29 @@ public class mainPizzeria {
                                     parte2 = false;
                                     break;
                                 case "3":
+                                    productos = controladorProducto.getAllProducts();
+
+                                    for (Producto productoItem : productos) {
+                                        System.out.println(
+                                                productoItem.getId() + " El producto " + productoItem.getNombre()
+                                                        + " con el precio " + productoItem.getPrecio() + " ");
+                                    }
+
+                                    while (productoInteresado == null) {
+                                        System.out.print("seleccione el id del  producto interesado: ");
+                                        opcion = sc.nextLine();
+                                        productoInteresado = controladorProducto
+                                                .getProductoById(Integer.parseInt(opcion));
+                                    }
+
+                                    System.out.println(productoInteresado);
+                                    System.out.print("selecciona  la cantida del producto");
+                                    cantidad = sc.nextInt();
+
+                                    controladorPedido.addCarrito(productoInteresado, cantidad, cliente);
+
+                                    break;
+                                case "4":
                                     parte2 = false;
                                     break;
                                 default:

@@ -54,6 +54,9 @@ public class DatabaseConfig {
                   ");";
 
       public static final String UPDATE_CLIENTE = "UPDATE cliente SET nombre = ? ,  ";
+      public static final String UPDATE_PEDIDO_ESTADO_AND_PAGO = "UPDATE pedido SET estadopedido = ? , metodopago = ?  where id = ? ";
+      public static final String UPDATE_PEDIDO_ESTADO = "UPDATE pedido SET estadopedido = ?  where id = ? ";
+
 
       static final String DROP_TABLE_CLIENTE = "DROP TABLE IF EXISTS cliente";
       static final String DROP_INGREDIENTE_ALERGENO = "DROP TABLE IF EXISTS ingrediente_alergeno";
@@ -143,7 +146,8 @@ public class DatabaseConfig {
                   "    fecha DATE,\n" +
                   "    estadopedido ENUM('ENTREGADO', 'PENDIENTE', 'CANCELADO'),\n" +
                   "    cliente_id INT,\n" + //
-                  "    FOREIGN KEY (cliente_id) REFERENCES Cliente(id)\n" + //
+                  "    FOREIGN KEY (cliente_id) REFERENCES Cliente(id),\n" + //
+                  "    metodopago INT NULL " +
                   ");";
 
       public static void CREATE_ALL_TABLES() throws ClassNotFoundException, SQLException {

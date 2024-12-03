@@ -22,4 +22,8 @@ public class ControladorProducto {
             jdbcProductoDAO.save(producto);
     }
 
+    public  Producto   getProductoById(int id) throws ClassNotFoundException, SQLException{
+        return jdbcProductoDAO.getProductoById(id); 
+    }
+
 }

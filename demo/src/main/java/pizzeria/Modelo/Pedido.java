@@ -41,6 +41,8 @@ public class Pedido {
         return true;
     }
 
+    
+
     public int getId() {
         return id;
     }
@@ -71,6 +73,14 @@ public class Pedido {
 
     public void setListaLineaPedidos(List<LineaPedido> listaLineaPedidos) {
         this.listaLineaPedidos = listaLineaPedidos;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
     }
 
 }

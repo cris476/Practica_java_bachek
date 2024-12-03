@@ -63,7 +63,7 @@ public class JdbcPedidoDAOTest {
                         "password123",
                         false));
 
-        jdbcPedidoDAO.save(2, pedido);
+        jdbcPedidoDAO.save(1, pedido);
 
     }
 

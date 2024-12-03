@@ -7,9 +7,8 @@ public class Pizza extends Producto {
     private SizeApp size;
     private List<Ingredientes> ingredientes;
 
- 
-    public Pizza( int id ,  String nombre, double precio, SizeApp size, List<Ingredientes> ingredientes) {
-        super(id , nombre, precio);
+    public Pizza(int id, String nombre, double precio, SizeApp size, List<Ingredientes> ingredientes) {
+        super(id, nombre, precio);
         this.size = size;
         this.ingredientes = ingredientes;
     }
@@ -19,8 +18,6 @@ public class Pizza extends Producto {
         this.size = size;
         this.ingredientes = ingredientes;
     }
-
-    
 
     public SizeApp getSize() {
         return size;
@@ -32,10 +29,9 @@ public class Pizza extends Producto {
 
     @Override
     public String toString() {
-        return "Pizza [id=" + id + ", size=" + size + ", nombre=" + nombre + ", precio=" + precio + "]";
+        return "Pizza [id=" + id + ", size=" + size + ", nombre=" + nombre + ", precio=" + precio + " ," + ingredientes
+                + " + ingredientes ]";
     }
-
-
 
     public List<Ingredientes> getIngredientes() {
         return ingredientes;

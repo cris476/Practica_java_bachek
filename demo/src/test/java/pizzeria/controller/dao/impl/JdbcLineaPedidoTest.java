@@ -20,7 +20,7 @@ public class JdbcLineaPedidoTest {
     @Test
     void testSave() throws ClassNotFoundException, SQLException {
         Connection con = new Conexion().getConexion();
-        jdbcLineaPedido.save(con, 2, 1, 9);
+        jdbcLineaPedido.save(con, 1, 1, 9);
     }
 
     @Test

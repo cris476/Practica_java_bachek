@@ -40,7 +40,7 @@ public class JdbcProductoDAO implements InnerProductoDAO {
                             if (ingredienteEncontrado == null) {
                                 insertarIngredienteYRelacion(con, idProducto, ingrediente);
                             } else {
-                                jdbcIngredienteDAO.relacionProductoIngrediente(con, idProducto, ingrediente);
+                                jdbcIngredienteDAO.relacionProductoIngrediente(con, idProducto, ingredienteEncontrado);
                             }
                         }
                     }

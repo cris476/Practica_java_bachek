@@ -3,6 +3,8 @@ package pizzeria.Controller.dao.impl;
 import static pizzeria.utils.DatabaseConfig.INSERT_PEDIDO;
 import static pizzeria.utils.DatabaseConfig.SELECT_PEDIDO_ESTADO;
 import static pizzeria.utils.DatabaseConfig.SELECT_PEDIDO_ID;
+import static pizzeria.utils.DatabaseConfig.UPDATE_PEDIDO_ESTADO;
+import static pizzeria.utils.DatabaseConfig.UPDATE_PEDIDO_ESTADO_AND_PAGO;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -17,6 +19,7 @@ import pizzeria.Controller.dao.InnerPedido;
 import pizzeria.Modelo.Conexion;
 import pizzeria.Modelo.EstadoPedido;
 import pizzeria.Modelo.LineaPedido;
+import pizzeria.Modelo.Pagable;
 import pizzeria.Modelo.Pedido;
 import pizzeria.Modelo.Producto;
 import pizzeria.Controller.dao.impl.JdbcLineaPedido;
@@ -110,6 +113,41 @@ public class JdbcPedidoDAO implements InnerPedido {
         }
 
         return listaLineaPedidos;
+    }
+
+    public void addCarrito(Pedido pedido, int cantidad) throws ClassNotFoundException, SQLException {
+
+        for (LineaPedido lineaPedido : pedido.getListaLineaPedidos()) {
+            jdbcLineaPedido.save(new Conexion().getConexion(), lineaPedido.getProducto().getId(), pedido.getId(),
+                    cantidad);
+        }
+    }
+
+    public void updatePedidoEstadoAndPagable(Pedido pedido, Pagable pagable)
+            throws ClassNotFoundException, SQLException {
+
+        try (Connection con = new Conexion().getConexion();
+                PreparedStatement preparedStatement = con.prepareStatement(UPDATE_PEDIDO_ESTADO_AND_PAGO)) {
+
+            preparedStatement.setString(1, pedido.getEstado().getValue());
+            preparedStatement.setInt(2, pagable.pagar());
+            preparedStatement.setInt(3, pedido.getId());
+
+            preparedStatement.executeUpdate();
+
+        }
+    }
+
+    public void updatePedidoEstado(Pedido pedido) throws SQLException, ClassNotFoundException {
+        try (Connection con = new Conexion().getConexion();
+                PreparedStatement preparedStatement = con.prepareStatement(UPDATE_PEDIDO_ESTADO)) {
+
+            preparedStatement.setString(1, pedido.getEstado().getValue());
+            preparedStatement.setInt(2, pedido.getId());
+
+            preparedStatement.executeUpdate();
+
+        }
     }
 
 }

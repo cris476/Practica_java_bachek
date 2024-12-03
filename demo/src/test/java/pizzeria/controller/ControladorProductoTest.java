@@ -18,7 +18,7 @@ import pizzeria.Modelo.SizeApp;
 public class ControladorProductoTest {
 
     ControladorProducto controladorProducto;
-    
+
     @BeforeEach
     void setUp() throws ClassNotFoundException, SQLException {
         controladorProducto = new ControladorProducto();
@@ -45,9 +45,9 @@ public class ControladorProductoTest {
 
         Pizza pizza = new Pizza("Peperonni", 15, SizeApp.GRANDE, ingredientesPizza);
 
-        Pasta pasta = new Pasta("cococolo", 12.3, ingredientesPizza);
+        
+       Pasta pasta = new Pasta("P", 12.3, ingredientesPizza);
 
         controladorProducto.registrarProducto(pasta);
     }
 }
-
