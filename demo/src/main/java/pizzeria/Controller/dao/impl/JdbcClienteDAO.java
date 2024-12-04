@@ -17,7 +17,6 @@ public class JdbcClienteDAO implements InnerClienteDAO {
 
     @Override
     public void save(Cliente cliente) throws SQLException, ClassNotFoundException {
-
         try (Connection con = new Conexion().getConexion();
                 Statement statement = con.createStatement();) {
             PreparedStatement preparedStatement = con.prepareStatement(INNER_CLIENTE);
@@ -28,7 +27,6 @@ public class JdbcClienteDAO implements InnerClienteDAO {
             preparedStatement.setString(5, cliente.getPassword());
             preparedStatement.setBoolean(6, cliente.getAdmin());
             preparedStatement.setString(7, cliente.getTelefono());
-
             preparedStatement.executeUpdate();
 
         }
@@ -38,7 +36,6 @@ public class JdbcClienteDAO implements InnerClienteDAO {
     public Cliente finbyCliente(String email) throws SQLException, ClassNotFoundException {
 
         Cliente cliente = null;
-
         try (Connection con = new Conexion().getConexion();
                 Statement statement = con.createStatement();
                 PreparedStatement preparedStatement = con.prepareStatement(SELECT_CLIENTE)) {

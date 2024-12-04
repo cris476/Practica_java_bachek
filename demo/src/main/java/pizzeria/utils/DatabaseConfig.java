@@ -56,7 +56,7 @@ public class DatabaseConfig {
       public static final String UPDATE_CLIENTE = "UPDATE cliente SET nombre = ? ,  ";
       public static final String UPDATE_PEDIDO_ESTADO_AND_PAGO = "UPDATE pedido SET estadopedido = ? , metodopago = ?  where id = ? ";
       public static final String UPDATE_PEDIDO_ESTADO = "UPDATE pedido SET estadopedido = ?  where id = ? ";
-
+      public static final String UPDATE_PRODUCTO = "UPDATE producto SET nombre = ? , precio = ? , tipo = ? , size = ? ";
 
       static final String DROP_TABLE_CLIENTE = "DROP TABLE IF EXISTS cliente";
       static final String DROP_INGREDIENTE_ALERGENO = "DROP TABLE IF EXISTS ingrediente_alergeno";
@@ -66,6 +66,10 @@ public class DatabaseConfig {
       static final String DROP_ALERGENO = "DROP TABLE IF EXISTS alergeno";
       static final String DROP_PEDIDO = "DROP TABLE IF EXISTS pedido";
       static final String DROP_LINEAPEDIDO = "DROP TABLE IF EXISTS LineaPedido";
+
+      public static final String DELETE_PRODUCTO = "DELETE FROM producto WHERE id = ?";
+      public static final String DELETE_CLIENTE = "DELETE FROM cliente WHERE id = ?";
+      public static final String DELETE_PEDIDO = "DELETE FROM pedido WHERE id = ?";
 
       public static final String CREATE_TABLE_CLIENTE = " CREATE TABLE cliente (\r\n" + //
                   "          id INT NOT NULL AUTO_INCREMENT,\r\n" + //

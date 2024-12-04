@@ -26,36 +26,23 @@ public class JdbcProductoDAO implements InnerProductoDAO {
 
     @Override
     public void save(Producto producto) throws SQLException, ClassNotFoundException {
+        Pizza pizza = null;
+        Pasta pasta = null;
 
         try (Connection con = new Conexion().getConexion()) {
             con.setAutoCommit(false);
-            // if (findByNameAndSize(producto) != null) {
             try {
-                int idProducto = insertarProducto(con, producto);
+                int idProducto = guardarProductoYRetornarId(con, producto);
                 if (producto instanceof Pizza) {
-                    Pizza pizza = (Pizza) producto;
-                    if (pizza.getIngredientes() != null && pizza.getIngredientes().size() >= 0) {
-                        for (Ingredientes ingrediente : pizza.getIngredientes()) {
-                            Ingredientes ingredienteEncontrado = jdbcIngredienteDAO.findByName(ingrediente.getNombre());
-                            if (ingredienteEncontrado == null) {
-                                insertarIngredienteYRelacion(con, idProducto, ingrediente);
-                            } else {
-                                jdbcIngredienteDAO.relacionProductoIngrediente(con, idProducto, ingredienteEncontrado);
-                            }
-                        }
+                    pizza = (Pizza) producto;
+                    if (pizza.getIngredientes() != null && !pizza.getIngredientes().isEmpty()) {
+                        manejarIngredientes(con, idProducto, pizza.getIngredientes());
                     }
 
                 } else if (producto instanceof Pasta) {
-                    Pasta pasta = (Pasta) producto;
+                    pasta = (Pasta) producto;
                     if (pasta.getIngredientes() != null && pasta.getIngredientes().size() >= 0) {
-                        for (Ingredientes ingrediente : pasta.getIngredientes()) {
-                            Ingredientes ingredienteEncontrado = jdbcIngredienteDAO.findByName(ingrediente.getNombre());
-                            if (ingredienteEncontrado == null) {
-                                insertarIngredienteYRelacion(con, idProducto, ingrediente);
-                            } else {
-                                jdbcIngredienteDAO.relacionProductoIngrediente(con, idProducto, ingredienteEncontrado);
-                            }
-                        }
+                        manejarIngredientes(con, idProducto, pasta.getIngredientes());
                     }
                 }
                 con.commit();
@@ -66,7 +53,20 @@ public class JdbcProductoDAO implements InnerProductoDAO {
         }
     }
 
-    private int insertarProducto(Connection con, Producto producto) throws SQLException, ClassNotFoundException {
+    private void manejarIngredientes(Connection con, int idProducto, List<Ingredientes> listaIngredientes)
+            throws ClassNotFoundException, SQLException {
+        for (Ingredientes ingrediente : listaIngredientes) {
+            Ingredientes ingredienteEncontrado = jdbcIngredienteDAO.findByName(ingrediente.getNombre());
+            if (ingredienteEncontrado == null) {
+                insertarIngredienteYRelacion(con, idProducto, ingrediente);
+            } else {
+                jdbcIngredienteDAO.relacionProductoIngrediente(con, idProducto, ingredienteEncontrado);
+            }
+        }
+    }
+
+    private int guardarProductoYRetornarId(Connection con, Producto producto)
+            throws SQLException, ClassNotFoundException {
         try (PreparedStatement preparedStatement = con.prepareStatement(INSERT_PRODUCTO,
                 Statement.RETURN_GENERATED_KEYS)) {
             if (producto instanceof Pizza) {
@@ -89,64 +89,7 @@ public class JdbcProductoDAO implements InnerProductoDAO {
         }
     }
 
-    public Producto findByNameAndSize(Producto producto) throws SQLException, ClassNotFoundException {
-        Pizza pizza;
-        Bebida bebida;
-        Pasta pasta;
-        Producto productoEncontrado = null;
-        try (Connection con = new Conexion().getConexion();
-                Statement statement = con.createStatement();
-                PreparedStatement preparedStatement = con.prepareStatement(SELECT_PRODUCTO_NAME_SIZE)) {
-
-            if (producto instanceof Pizza) {
-                pizza = (Pizza) producto;
-                preparedStatement.setString(1, pizza.getNombre());
-                preparedStatement.setString(2, pizza.getSize().getValue());
-            } else if (producto instanceof Bebida) {
-                bebida = (Bebida) producto;
-                preparedStatement.setString(1, bebida.getNombre());
-                preparedStatement.setString(2, bebida.getSize().getValue());
-            } else if (producto instanceof Pasta) {
-                return null;
-            }
-
-            preparedStatement.setString(1, producto.getNombre());
-
-            try (ResultSet resultado = preparedStatement.executeQuery();) {
-                if (resultado.next()) {
-
-                    int idProducto = resultado.getInt("id");
-                    String nombre = resultado.getString("nombre");
-                    Double precio = resultado.getDouble("precio");
-                    SizeApp size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
-                    Tipo tipo = Tipo.valueOf(resultado.getString("tipo").toUpperCase());
-                    List<Ingredientes> listaIngredientes = new ArrayList<Ingredientes>();
-
-                    switch (tipo.getValue()) {
-                        case "pasta":
-                            listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
-                            productoEncontrado = new Pasta(idProducto, nombre, precio, listaIngredientes);
-
-                            break;
-                        case "pizza":
-                            listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con,
-                                    idProducto);
-                            productoEncontrado = new Pizza(idProducto, nombre, precio, size, listaIngredientes);
-                            break;
-                        case "bebida":
-                            productoEncontrado = new Bebida(idProducto, nombre, precio, size);
-                            break;
-                        default:
-                            break;
-                    }
-
-                }
-            }
-
-        }
-
-        return productoEncontrado;
-    }
+    // }
 
     private void insertarIngredienteYRelacion(Connection con, int idProducto, Ingredientes ingrediente)
             throws SQLException, ClassNotFoundException {
@@ -155,12 +98,10 @@ public class JdbcProductoDAO implements InnerProductoDAO {
 
     private void savePizza(PreparedStatement preparedStatement, Pizza pizza)
             throws SQLException, ClassNotFoundException {
-
         preparedStatement.setString(1, pizza.getNombre());
         preparedStatement.setDouble(2, pizza.getPrecio());
         preparedStatement.setString(3, Tipo.PIZZA.getValue());
         preparedStatement.setString(4, pizza.getSize().getValue());
-
     }
 
     private void saveBebida(PreparedStatement preparedStatement, Bebida bebida) throws SQLException {
@@ -183,92 +124,95 @@ public class JdbcProductoDAO implements InnerProductoDAO {
 
     @Override
     public List<Producto> getAllProductos() throws SQLException, ClassNotFoundException {
-
-        List<Producto> listaProductos = new ArrayList<Producto>();
+        List<Producto> listaProductos = new ArrayList<>();
         try (Connection con = new Conexion().getConexion();
-                Statement statement = con.createStatement();
-                PreparedStatement preparedStatement = con.prepareStatement(SELECT_ALL_PRODUCTO)) {
+                PreparedStatement preparedStatement = con.prepareStatement(SELECT_ALL_PRODUCTO);
+                ResultSet resultado = preparedStatement.executeQuery()) {
 
-            try (ResultSet resultado = preparedStatement.executeQuery();) {
-                while (resultado.next()) {
-                    SizeApp size;
-                    int idProducto = resultado.getInt("id");
-                    String nombre = resultado.getString("nombre");
-                    Double precio = resultado.getDouble("precio");
-                    Tipo tipo = Tipo.valueOf(resultado.getString("tipo").toUpperCase());
-                    List<Ingredientes> listaIngredientes = new ArrayList<Ingredientes>();
-
-                    switch (tipo.getValue()) {
-                        case "pasta":
-                            listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
-                            listaProductos.add(new Pasta(idProducto, nombre, precio, listaIngredientes));
-
-                            break;
-                        case "pizza":
-                            size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
-                            listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
-                            listaProductos.add(new Pizza(idProducto, nombre, precio, size, listaIngredientes));
-                            break;
-                        case "bebida":
-                            size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
-                            listaProductos.add(new Bebida(idProducto, nombre, precio, size));
-                            break;
-                        default:
-                            break;
-                    }
-
+            while (resultado.next()) {
+                Producto producto = construirProductoDesdeResultSet(resultado, con);
+                if (producto != null) {
+                    listaProductos.add(producto);
                 }
             }
-
         }
-
         return listaProductos;
-
     }
 
+    @Override
     public Producto getProductoById(int idProducto) throws SQLException, ClassNotFoundException {
-
         Producto producto = null;
-        SizeApp size ; 
         try (Connection con = new Conexion().getConexion();
-                Statement statement = con.createStatement();
                 PreparedStatement preparedStatement = con.prepareStatement(SELECT_ALL_PRODUCTO_ID)) {
-
             preparedStatement.setInt(1, idProducto);
-
-            try (ResultSet resultado = preparedStatement.executeQuery();) {
+            try (ResultSet resultado = preparedStatement.executeQuery()) {
                 if (resultado.next()) {
-                    String nombre = resultado.getString("nombre");
-                    Double precio = resultado.getDouble("precio");
-
-                    Tipo tipo = Tipo.valueOf(resultado.getString("tipo").toUpperCase());
-                    List<Ingredientes> listaIngredientes = new ArrayList<Ingredientes>();
-
-                    switch (tipo.getValue()) {
-                        case "pasta":
-                            listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
-                            producto = new Pasta(idProducto, nombre, precio, listaIngredientes);
-
-                            break;
-                        case "pizza":
-                             size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
-                            listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
-                            producto = new Pizza(idProducto, nombre, precio, size, listaIngredientes);
-                            break;
-                        case "bebida":
-                             size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
-                            producto = new Bebida(idProducto, nombre, precio, size);
-                            break;
-                        default:
-                            break;
-                    }
-
+                    producto = construirProductoDesdeResultSet(resultado, con);
                 }
             }
+        }
+        return producto;
+    }
+
+    private Producto construirProductoDesdeResultSet(ResultSet resultado, Connection con) throws SQLException {
+        int idProducto = resultado.getInt("id");
+        String nombre = resultado.getString("nombre");
+        Double precio = resultado.getDouble("precio");
+        Tipo tipo = Tipo.valueOf(resultado.getString("tipo").toUpperCase());
+        List<Ingredientes> listaIngredientes;
+
+        switch (tipo.getValue()) {
+            case "pasta":
+                listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
+                return new Pasta(idProducto, nombre, precio, listaIngredientes);
+            case "pizza":
+                SizeApp size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
+                listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
+                return new Pizza(idProducto, nombre, precio, size, listaIngredientes);
+            case "bebida":
+                size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
+                return new Bebida(idProducto, nombre, precio, size);
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void deleted(Producto producto) throws SQLException, ClassNotFoundException {
+        try (Connection con = new Conexion().getConexion();
+                PreparedStatement preparedStatement = con.prepareStatement(DELETE_PRODUCTO)) {
+            preparedStatement.setInt(1, producto.getId());
+        }
+    }
+
+    @Override
+    public void update(Producto producto) throws SQLException, ClassNotFoundException {
+        try (Connection con = new Conexion().getConexion();
+                PreparedStatement preparedStatement = con.prepareStatement(UPDATE_PRODUCTO)) {
+            Pizza pizza = null;
+            Pasta pasta = null;
+            Bebida bebida = null;
+
+            if (producto instanceof Pizza) {
+                pizza = (Pizza) producto;
+                preparedStatement.setString(1, pizza.getNombre());
+                preparedStatement.setDouble(2, pizza.getPrecio());
+                preparedStatement.setString(4, pizza.getSize().getValue());
+
+            } else if (producto instanceof Pasta) {
+                pasta = (Pasta) producto;
+                preparedStatement.setString(1, pasta.getNombre());
+                preparedStatement.setDouble(2, pasta.getPrecio());
+
+            } else if (producto instanceof Bebida) {
+                bebida = (Bebida) producto;
+                preparedStatement.setString(1, bebida.getNombre());
+                preparedStatement.setDouble(2, bebida.getPrecio());
+            }
+
+            preparedStatement.executeUpdate();
 
         }
-
-        return producto;
 
     }
 

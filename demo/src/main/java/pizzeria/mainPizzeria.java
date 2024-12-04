@@ -58,7 +58,6 @@ public class mainPizzeria {
         Pagable metodoPago = null;
 
         Scanner sc = new Scanner(System.in);
-
         ContraladorCliente controladorCliente = new ContraladorCliente();
         ControladorProducto controladorProducto = new ControladorProducto();
         ContraladorPedido controladorPedido = new ContraladorPedido();
@@ -69,16 +68,16 @@ public class mainPizzeria {
             System.out.println("2. Registrarse");
             System.out.print("3.salir");
             System.out.println("Seleccion una opcion : ");
-            opcion = sc.nextLine();
+            opcion = sc.next();
 
             switch (opcion) {
                 case "1":
 
                     System.out.print("Introduce el nombre: ");
-                    nombre = sc.nextLine();
+                    nombre = sc.next();
 
                     System.out.print("Introduce la contraseña: ");
-                    password = sc.nextLine();
+                    password = sc.next();
 
                     try {
                         cliente = controladorCliente.loginCliente(nombre, password);
@@ -98,14 +97,16 @@ public class mainPizzeria {
                             System.out.println("5. cancelar pedido");
                             System.out.println("6. salir");
                             System.out.print("Seleccion una opcion : ");
-                            opcion = sc.nextLine();
+                            opcion = sc.next();
 
                             switch (opcion) {
                                 case "1":
                                     productos = controladorProducto.getAllProducts();
 
-                                    for (Producto productooo : productos) {
-                                        System.out.println(productooo);
+                                    for (Producto productoItem : productos) {
+                                        System.out.println(
+                                                productoItem.getId() + " El producto " + productoItem.getNombre()
+                                                        + " con el precio " + productoItem.getPrecio() + "$ ");
                                     }
                                     break;
                                 case "2":
@@ -116,7 +117,7 @@ public class mainPizzeria {
                                         System.out.println("3. bebida");
 
                                         System.out.print("selecciona el tipo de producto:");
-                                        opcion = sc.nextLine();
+                                        opcion = sc.next();
 
                                         switch (opcion) {
                                             case "1":
@@ -139,39 +140,46 @@ public class mainPizzeria {
                                     }
 
                                     while (añadirIngrediente && Tipo.BEBIDA != tipo) {
+                                        ingredientes = new ArrayList<>(); 
 
-                                        while (añadirAlergeno) {
-                                            System.out.println();
-                                            System.out.print("Añadir Alergeno:");
-                                            alergeno = sc.nextLine();
+                                        while (añadirIngrediente) {
+                                            alergenos = new ArrayList<>();
+                                                                       
+                                            while (añadirAlergeno) {
+                                                System.out.println();
+                                                System.out.print("Añadir Alergeno:");
+                                                alergeno = sc.next();
 
-                                            alergenos.add(new Alergeno(alergeno));
+                                                alergenos.add(new Alergeno(alergeno)); 
 
-                                            System.out.print("Quieres Añadir mas Alergenos S/N:");
-                                            opcion = sc.nextLine();
-                                            if (opcion.equalsIgnoreCase("N")) {
-                                                añadirAlergeno = false;
+                                                System.out.print("¿Quieres añadir más alérgenos? (S/N):");
+                                                opcion = sc.next();
+                                                if (opcion.equalsIgnoreCase("N")) {
+                                                    añadirAlergeno = false;
+                                                }
                                             }
 
-                                        }
-                                        System.out.println();
-                                        System.out.print("Introduce el nombre del Ingrediente:");
-                                        nombreIngrediente = sc.nextLine();
+                                            System.out.println();
+                                            System.out.print("Introduce el nombre del ingrediente:");
+                                            nombreIngrediente = sc.next();
 
-                                        ingredientes.add(new Ingredientes(nombreIngrediente, alergenos));
-                                        System.out.println();
-                                        System.out.print("Quieres Añadir mas Ingredientes S/N:");
-                                        opcion = sc.nextLine();
+                                           
+                                            ingredientes.add(new Ingredientes(nombreIngrediente, alergenos));
 
-                                        if (opcion.equalsIgnoreCase("N")) {
-                                            añadirIngrediente = false;
-                                        } else {
-                                            añadirAlergeno = true;
+                                            System.out.println();
+                                            System.out.print("¿Quieres añadir más ingredientes? (S/N):");
+                                            opcion = sc.next();
+
+                                            if (opcion.equalsIgnoreCase("N")) {
+                                                añadirIngrediente = false; 
+                                            } else {
+                                                añadirAlergeno = true; 
+                                            }
                                         }
                                     }
 
                                     System.out.print("Introduce un nombre al producto " + tipo.getValue() + ":");
-                                    nombreProducto = sc.nextLine();
+                                    nombreProducto = sc.next();
 
                                     System.out.print("Introduce el precio del producto " + tipo.getValue() + ":");
                                     precio = sc.nextDouble();
@@ -184,7 +192,7 @@ public class mainPizzeria {
                                                 System.out.println("1. grande");
                                                 System.out.println("2. medio");
                                                 System.out.println("3. pequeño");
-                                                System.out.print("Selecciona el tamaño del producto");
+                                                System.out.print("Selecciona el tamaño del producto: ");
                                                 opcion = sc.next();
 
                                                 switch (opcion) {
@@ -220,7 +228,7 @@ public class mainPizzeria {
                                                 System.out.println("2. medio");
                                                 System.out.println("3. pequeño");
                                                 System.out.print("Selecciona el tamaño del producto");
-                                                opcion = sc.nextLine();
+                                                opcion = sc.next();
 
                                                 switch (opcion) {
                                                     case "1":
@@ -263,7 +271,7 @@ public class mainPizzeria {
                                     for (Producto productoItem : productos) {
                                         System.out.println(
                                                 productoItem.getId() + " El producto " + productoItem.getNombre()
-                                                        + " con el precio " + productoItem.getPrecio() + " ");
+                                                        + " con el precio " + productoItem.getPrecio() + "$ ");
                                     }
 
                                     while (productoInteresado == null) {
@@ -288,7 +296,7 @@ public class mainPizzeria {
 
                                         System.out.println("1. efectivo");
                                         System.out.println("2. tarjeta");
-                                        System.out.print("Selecciona el metodo de pago: ");
+                                        System.out.print("Selecciona el método de pago: ");
                                         opcion = sc.next();
 
                                         switch (opcion) {
@@ -310,6 +318,9 @@ public class mainPizzeria {
 
                                     break;
                                 case "5":
+                                    controladorPedido.cancelarPedido(cliente);
+                                    break;
+                                case "6":
                                     parte2 = false;
                                     break;
                                 default:

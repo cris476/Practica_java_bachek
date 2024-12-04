@@ -35,24 +35,18 @@ public class JdbcPedidoDAO implements InnerPedido {
                         Statement.RETURN_GENERATED_KEYS)) {
 
             java.sql.Date sqlDate = new java.sql.Date(pedido.getFecha().getTime());
-
             preparedStatement.setDate(1, sqlDate);
             preparedStatement.setInt(2, idCliente);
             preparedStatement.setString(3, pedido.getEstado().getValue());
-
             preparedStatement.executeUpdate();
-
             int idPedido = 0;
-
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     idPedido = generatedKeys.getInt(1);
-
                     for (LineaPedido lineaPedido : pedido.getListaLineaPedidos()) {
                         jdbcLineaPedido.save(con, lineaPedido.getProducto().getId(), idPedido,
                                 lineaPedido.getCantidad());
                     }
-
                 } else {
                     throw new SQLException("No se pudo obtener el ID generado para el pedido.");
                 }
@@ -111,15 +105,12 @@ public class JdbcPedidoDAO implements InnerPedido {
             }
 
         }
-
         return listaLineaPedidos;
     }
 
     public void addCarrito(Pedido pedido, Producto producto, int cantidad) throws ClassNotFoundException, SQLException {
-
         jdbcLineaPedido.save(new Conexion().getConexion(), producto.getId(), pedido.getId(),
                 cantidad);
-
     }
 
     public void updatePedidoEstadoAndPagable(Pedido pedido, Pagable pagable)
@@ -127,11 +118,9 @@ public class JdbcPedidoDAO implements InnerPedido {
 
         try (Connection con = new Conexion().getConexion();
                 PreparedStatement preparedStatement = con.prepareStatement(UPDATE_PEDIDO_ESTADO_AND_PAGO)) {
-
             preparedStatement.setString(1, pedido.getEstado().getValue());
             preparedStatement.setInt(2, pagable.pagar());
             preparedStatement.setInt(3, pedido.getId());
-
             preparedStatement.executeUpdate();
 
         }
@@ -140,12 +129,9 @@ public class JdbcPedidoDAO implements InnerPedido {
     public void updatePedidoEstado(Pedido pedido) throws SQLException, ClassNotFoundException {
         try (Connection con = new Conexion().getConexion();
                 PreparedStatement preparedStatement = con.prepareStatement(UPDATE_PEDIDO_ESTADO)) {
-
             preparedStatement.setString(1, pedido.getEstado().getValue());
             preparedStatement.setInt(2, pedido.getId());
-
             preparedStatement.executeUpdate();
-
         }
     }
 

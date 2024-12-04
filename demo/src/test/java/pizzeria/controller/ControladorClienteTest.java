@@ -59,11 +59,8 @@ public class ControladorClienteTest {
     @Test
     void testGetAllCliente() throws ClassNotFoundException, SQLException {
         List<Cliente> listadoCliente = null;
-
         listadoCliente = contraladorCliente.todosClientes();
-
         assertNotEquals(listadoCliente, null);
-
     }
 
 }
