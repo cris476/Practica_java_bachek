@@ -11,7 +11,9 @@ public interface InnerAlergeno {
 
     public Alergeno findById(int id) throws SQLException, ClassNotFoundException;
 
-    
-    public Alergeno findByName(Connection con,  String name) throws SQLException, ClassNotFoundException;
+    public Alergeno findByName(Connection con, String name) throws SQLException, ClassNotFoundException;
+
+    public void relacionIngredienteAlergeno(Connection con, int id_ingrediente, int id_alergeno)
+            throws SQLException, ClassNotFoundException;
 
 }

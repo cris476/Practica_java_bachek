@@ -1,5 +1,6 @@
 package pizzeria.Controller.dao.impl;
 
+import java.lang.classfile.ClassFile.Option;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,40 +19,42 @@ public class JdbcIngredienteDAO implements InnerIngredienteDAO {
     private final JdbcAlergeno jdbcAlergeno = new JdbcAlergeno();
 
     @Override
-    public void save(Connection con, int id_producto, Ingredientes ingrediente)
+    public void save(Connection con, int idProducto, Ingredientes ingrediente)
             throws SQLException, ClassNotFoundException {
-
         con.setAutoCommit(false);
-
-        int id_ingrediente = insertarIngrediente(con, ingrediente);
-
-        insertarProductoIngrediente(con, id_producto, id_ingrediente);
-
-        if (ingrediente.getAlergenos() != null && ingrediente.getAlergenos().size() >= 0) {
-            for (Alergeno alergeno : ingrediente.getAlergenos()) {
-
-                Alergeno alergenoExiste = jdbcAlergeno.findByName(con, alergeno.getNombre());
-
-                if (alergenoExiste == null) {
-                    jdbcAlergeno.save(con, id_ingrediente, alergeno);
-                } else {
-                    jdbcAlergeno.relacionIngredienteAlergeno(con, id_ingrediente, alergenoExiste.getId());
-                }
-            }
-        }
+        int idIngrediente = insertarIngrediente(con, ingrediente);
+        insertarProductoIngrediente(con, idProducto, idIngrediente);
+        procesarAlergenos(con, idIngrediente, ingrediente);
         con.commit();
     }
 
-    public void relacionProductoIngrediente(Connection con, int id_producto, Ingredientes ingrediente)
+    private void procesarAlergenos(Connection con, int idIngrediente, Ingredientes ingrediente)
             throws SQLException, ClassNotFoundException {
+                Alergeno alergenoExiste = null ; 
 
+        if (ingrediente.getAlergenos() == null || ingrediente.getAlergenos().isEmpty()) {
+            return;
+        }
+
+        for (Alergeno alergeno : ingrediente.getAlergenos()) {
+             alergenoExiste = jdbcAlergeno.findByName(con, alergeno.getNombre());
+            if (alergenoExiste == null) {
+                jdbcAlergeno.save(con, idIngrediente, alergeno);
+            } else {
+                jdbcAlergeno.relacionIngredienteAlergeno(con, idIngrediente, alergenoExiste.getId());
+            }
+        }
+    }
+
+    public void relacionProductoIngrediente(Connection con, int idProducto, Ingredientes ingrediente)
+            throws SQLException, ClassNotFoundException {
         con.setAutoCommit(false);
-        insertarProductoIngrediente(con, id_producto, ingrediente.getId());
+        insertarProductoIngrediente(con, idProducto, ingrediente.getId());
         con.commit();
     }
 
     private int insertarIngrediente(Connection con, Ingredientes ingrediente) throws SQLException {
-        int idIngrediente;
+        int idIngrediente = 0;
         try (PreparedStatement preparedStatement = con.prepareStatement(INSERT_INGREDIENTE,
                 PreparedStatement.RETURN_GENERATED_KEYS)) {
 
@@ -62,72 +65,60 @@ public class JdbcIngredienteDAO implements InnerIngredienteDAO {
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     idIngrediente = generatedKeys.getInt(1);
-                } else {
-                    throw new SQLException("No se pudo obtener el ID generado para el ingrediente.");
                 }
             }
-            con.commit();
+
         }
         return idIngrediente;
     }
 
-    public void insertarProductoIngrediente(Connection con, int id_producto, int id_ingrediente)
+    public void insertarProductoIngrediente(Connection con, int idProducto, int idIngrediente)
             throws SQLException, ClassNotFoundException {
 
-        if (!relacionProductoIngredienteExits(id_producto, id_ingrediente)) {
+        if (!relationProductoIngredienteExists(con, idProducto, idIngrediente)) {
             try (PreparedStatement preparedStatement = con.prepareStatement(INSERT_PRODUCTO_iNGREDIENTE)) {
-                preparedStatement.setInt(1, id_producto);
-                preparedStatement.setInt(2, id_ingrediente);
+                preparedStatement.setInt(1, idProducto);
+                preparedStatement.setInt(2, idIngrediente);
                 preparedStatement.executeUpdate();
             }
         }
     }
 
-    public boolean relacionProductoIngredienteExits(int id_producto, int id_ingrediente)
+    private boolean relationProductoIngredienteExists(Connection con, int idProducto, int idIngrediente)
             throws SQLException, ClassNotFoundException {
         int id = 0;
         try (
-                Connection con = new Conexion().getConexion();
                 PreparedStatement preparedStatement = con.prepareStatement(SELECT_PRODUCTO_INGREDIENTE_EXIST);) {
-
-            preparedStatement.setInt(1, id_producto);
-            preparedStatement.setInt(2, id_ingrediente);
+            preparedStatement.setInt(1, idProducto);
+            preparedStatement.setInt(2, idIngrediente);
 
             try (ResultSet resultado = preparedStatement.executeQuery()) {
-
                 if (resultado.next()) {
                     id = resultado.getInt("id");
                 }
-
             }
             return id != 0;
         }
     }
 
     public Ingredientes findByName(String name) throws SQLException, ClassNotFoundException {
-
         Ingredientes ingrediente = null;
         try (Connection con = new Conexion().getConexion();
                 PreparedStatement preparedStatement = con.prepareStatement(SELECT_INGREDIENTE_NOMBRE)) {
 
             con.setAutoCommit(false);
-
             preparedStatement.setString(1, name);
 
             try (ResultSet resultado = preparedStatement.executeQuery()) {
 
                 if (resultado.next()) {
-                    int idIngrediente = resultado.getInt("id");
-                    String nombreIngrediente = resultado.getString("nombre");
-                    List<Alergeno> alergenos = jdbcAlergeno.getAllAlergenoByidIngrediente(con, idIngrediente);
-                    ingrediente = new Ingredientes(idIngrediente, nombreIngrediente, alergenos);
+                    ingrediente = buildIngredienteFromResultSet(con, resultado);
                 }
 
             } catch (Exception e) {
                 con.rollback();
                 throw e;
             }
-
             con.commit();
             return ingrediente;
         }
@@ -135,25 +126,30 @@ public class JdbcIngredienteDAO implements InnerIngredienteDAO {
     }
 
     @Override
-    public List<Ingredientes> getAllIngredienteByidProducto(Connection con, int id) {
+    public List<Ingredientes> getAllIngredientesByIdProducto(Connection con, int id)
+            throws SQLException, ClassNotFoundException {
+
         List<Ingredientes> listaIngrediente = new ArrayList<Ingredientes>();
         try (PreparedStatement preparedStatement = con.prepareStatement(SELECT_PRODUCTO_INGREDIENTE)) {
 
             preparedStatement.setInt(1, id);
             try (ResultSet resultado = preparedStatement.executeQuery()) {
                 while (resultado.next()) {
-                    int idIngrediente = resultado.getInt("id");
-                    String nombreIngrediente = resultado.getString("nombre");
-                    List<Alergeno> listaAlergeno = jdbcAlergeno.getAllAlergenoByidIngrediente(con, idIngrediente);
-                    listaIngrediente.add(new Ingredientes(idIngrediente, nombreIngrediente, listaAlergeno));
+                    buildIngredienteFromResultSet(con, resultado);
+                    listaIngrediente.add(buildIngredienteFromResultSet(con, resultado));
                 }
             }
-        } catch (Exception e) {
 
         }
-
         return listaIngrediente;
+    }
 
+    private Ingredientes buildIngredienteFromResultSet(Connection con, ResultSet resultado)
+            throws SQLException, ClassNotFoundException {
+        int idIngrediente = resultado.getInt("id");
+        String nombreIngrediente = resultado.getString("nombre");
+        List<Alergeno> alergenos = jdbcAlergeno.getAllAlergenoByidIngrediente(con, idIngrediente);
+        return new Ingredientes(idIngrediente, nombreIngrediente, alergenos);
     }
 
 }

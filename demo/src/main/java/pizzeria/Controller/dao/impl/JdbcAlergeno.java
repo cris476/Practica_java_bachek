@@ -22,34 +22,32 @@ import pizzeria.Modelo.Conexion;
 public class JdbcAlergeno implements InnerAlergeno {
 
     @Override
-    public void save(Connection con, int id_ingrediente, Alergeno alergeno)
+    public void save(Connection con, int idIngrediente, Alergeno alergeno)
             throws SQLException, ClassNotFoundException {
-
         try (Statement statement = con.createStatement();
                 PreparedStatement preparedStatement = con.prepareStatement(INSERT_ALERGENO,
                         statement.RETURN_GENERATED_KEYS)) {
+            int idAlergeno = 0;
             con.setAutoCommit(false);
-
             preparedStatement.setString(1, alergeno.getNombre());
             preparedStatement.executeUpdate();
 
-            int id_alergeno = 0;
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    id_alergeno = generatedKeys.getInt(1);
+                    idAlergeno = generatedKeys.getInt(1);
                 }
             }
-            con.commit();
-            relacionIngredienteAlergeno(con, id_ingrediente, id_alergeno);
+
+            relacionIngredienteAlergeno(con, idIngrediente, idAlergeno);
         }
     }
 
+    @Override
     public void relacionIngredienteAlergeno(Connection con, int id_ingrediente, int id_alergeno)
             throws SQLException, ClassNotFoundException {
         con.setAutoCommit(false);
-        if (!relacionIngredienteAlergenoExits(id_ingrediente, id_alergeno)) {
+        if (!relacionIngredienteAlergenoExite(id_ingrediente, id_alergeno)) {
             try (PreparedStatement preparedStatement2 = con.prepareStatement(INSERT_INGREDIENTE_ALERGENO)) {
-
                 preparedStatement2.setInt(1, id_ingrediente);
                 preparedStatement2.setInt(2, id_alergeno);
                 preparedStatement2.executeUpdate();
@@ -61,39 +59,31 @@ public class JdbcAlergeno implements InnerAlergeno {
 
     @Override
     public Alergeno findById(int id) throws SQLException, ClassNotFoundException {
-
         Alergeno alergeno = null;
         try (Connection con = new Conexion().getConexion();
                 PreparedStatement preparedStatement = con.prepareStatement(SELECT_ALERGENO_ID)) {
-
             con.setAutoCommit(false);
-
             preparedStatement.setInt(1, id);
-
             try (ResultSet resultado = preparedStatement.executeQuery()) {
-
                 if (resultado.next()) {
-
                     int idAlergeno = resultado.getInt("id");
                     String nombreAlergeno = resultado.getString("nombre");
-
                     alergeno = new Alergeno(idAlergeno, nombreAlergeno);
                 }
             } catch (Exception e) {
                 con.rollback();
                 throw e;
             }
-
             con.commit();
             return alergeno;
         }
-
     }
 
     public List<Alergeno> getAllAlergenoByidIngrediente(Connection con, int id_ingrediente)
             throws SQLException, ClassNotFoundException {
         List<Alergeno> alergenos = new ArrayList<Alergeno>();
         try (PreparedStatement preparedStatement = con.prepareStatement(SELECT_INGREDIENTE_ALERGENO);) {
+
             preparedStatement.setInt(1, id_ingrediente);
             try (ResultSet resultado = preparedStatement.executeQuery()) {
 
@@ -102,58 +92,43 @@ public class JdbcAlergeno implements InnerAlergeno {
                     String nombreAlergeno = resultado.getString("nombre");
                     alergenos.add(new Alergeno(idAlergeno, nombreAlergeno));
                 }
-
             }
             return alergenos;
-
-        } catch (SQLException e) {
-            throw e;
         }
-
     }
 
-    public boolean relacionIngredienteAlergenoExits(int id_ingrediente, int id_alergeno)
+    public boolean relacionIngredienteAlergenoExite(int id_ingrediente, int id_alergeno)
             throws SQLException, ClassNotFoundException {
         int id = 0;
-        try (
-                Connection con = new Conexion().getConexion();
+        try (Connection con = new Conexion().getConexion();
                 PreparedStatement preparedStatement = con.prepareStatement(SELECT_INGREDIENTE_ALERGENO_EXIST);) {
-
             preparedStatement.setInt(1, id_ingrediente);
             preparedStatement.setInt(2, id_alergeno);
-
             try (ResultSet resultado = preparedStatement.executeQuery()) {
-
                 if (resultado.next()) {
                     id = resultado.getInt("id");
                 }
-
             }
-
             return id != 0;
         }
     }
 
     @Override
     public Alergeno findByName(Connection con, String name) throws SQLException, ClassNotFoundException {
-
         Alergeno alergeno = null;
-        try (
-                PreparedStatement preparedStatement = con.prepareStatement(SELECT_ALERGENO_NOMBRE)) {
-
+        int idAlergeno = 0;
+        String nombreAlergeno = null;
+        try (PreparedStatement preparedStatement = con.prepareStatement(SELECT_ALERGENO_NOMBRE)) {
             con.setAutoCommit(false);
-
             preparedStatement.setString(1, name);
-
             try (ResultSet resultado = preparedStatement.executeQuery()) {
 
                 if (resultado.next()) {
-
-                    int idAlergeno = resultado.getInt("id");
-                    String nombreAlergeno = resultado.getString("nombre");
-
+                    idAlergeno = resultado.getInt("id");
+                    nombreAlergeno = resultado.getString("nombre");
                     alergeno = new Alergeno(idAlergeno, nombreAlergeno);
                 }
+
             } catch (Exception e) {
                 con.rollback();
                 throw e;

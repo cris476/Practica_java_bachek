@@ -89,8 +89,6 @@ public class JdbcProductoDAO implements InnerProductoDAO {
         }
     }
 
-    // }
-
     private void insertarIngredienteYRelacion(Connection con, int idProducto, Ingredientes ingrediente)
             throws SQLException, ClassNotFoundException {
         jdbcIngredienteDAO.save(con, idProducto, ingrediente);
@@ -154,7 +152,7 @@ public class JdbcProductoDAO implements InnerProductoDAO {
         return producto;
     }
 
-    private Producto construirProductoDesdeResultSet(ResultSet resultado, Connection con) throws SQLException {
+    private Producto construirProductoDesdeResultSet(ResultSet resultado, Connection con) throws SQLException, ClassNotFoundException {
         int idProducto = resultado.getInt("id");
         String nombre = resultado.getString("nombre");
         Double precio = resultado.getDouble("precio");
@@ -163,11 +161,11 @@ public class JdbcProductoDAO implements InnerProductoDAO {
 
         switch (tipo.getValue()) {
             case "pasta":
-                listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
+                listaIngredientes = jdbcIngredienteDAO.getAllIngredientesByIdProducto(con, idProducto);
                 return new Pasta(idProducto, nombre, precio, listaIngredientes);
             case "pizza":
                 SizeApp size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
-                listaIngredientes = jdbcIngredienteDAO.getAllIngredienteByidProducto(con, idProducto);
+                listaIngredientes = jdbcIngredienteDAO.getAllIngredientesByIdProducto(con, idProducto);
                 return new Pizza(idProducto, nombre, precio, size, listaIngredientes);
             case "bebida":
                 size = SizeApp.valueOf(resultado.getString("size").toUpperCase());
@@ -178,7 +176,7 @@ public class JdbcProductoDAO implements InnerProductoDAO {
     }
 
     @Override
-    public void deleted(Producto producto) throws SQLException, ClassNotFoundException {
+    public void delete(Producto producto) throws SQLException, ClassNotFoundException {
         try (Connection con = new Conexion().getConexion();
                 PreparedStatement preparedStatement = con.prepareStatement(DELETE_PRODUCTO)) {
             preparedStatement.setInt(1, producto.getId());
@@ -198,20 +196,21 @@ public class JdbcProductoDAO implements InnerProductoDAO {
                 preparedStatement.setString(1, pizza.getNombre());
                 preparedStatement.setDouble(2, pizza.getPrecio());
                 preparedStatement.setString(4, pizza.getSize().getValue());
+                preparedStatement.setInt(5, pizza.getId());
 
             } else if (producto instanceof Pasta) {
                 pasta = (Pasta) producto;
                 preparedStatement.setString(1, pasta.getNombre());
                 preparedStatement.setDouble(2, pasta.getPrecio());
+                preparedStatement.setInt(5, pasta.getId());
 
             } else if (producto instanceof Bebida) {
                 bebida = (Bebida) producto;
                 preparedStatement.setString(1, bebida.getNombre());
                 preparedStatement.setDouble(2, bebida.getPrecio());
+                preparedStatement.setInt(5, bebida.getId());
             }
-
             preparedStatement.executeUpdate();
-
         }
 
     }

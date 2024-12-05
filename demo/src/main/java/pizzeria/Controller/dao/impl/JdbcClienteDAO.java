@@ -17,8 +17,7 @@ public class JdbcClienteDAO implements InnerClienteDAO {
 
     @Override
     public void save(Cliente cliente) throws SQLException, ClassNotFoundException {
-        try (Connection con = new Conexion().getConexion();
-                Statement statement = con.createStatement();) {
+        try (Connection con = new Conexion().getConexion();) {
             PreparedStatement preparedStatement = con.prepareStatement(INNER_CLIENTE);
             preparedStatement.setString(1, cliente.getDni());
             preparedStatement.setString(2, cliente.getNombre());
@@ -28,7 +27,6 @@ public class JdbcClienteDAO implements InnerClienteDAO {
             preparedStatement.setBoolean(6, cliente.getAdmin());
             preparedStatement.setString(7, cliente.getTelefono());
             preparedStatement.executeUpdate();
-
         }
     }
 
@@ -37,26 +35,14 @@ public class JdbcClienteDAO implements InnerClienteDAO {
 
         Cliente cliente = null;
         try (Connection con = new Conexion().getConexion();
-                Statement statement = con.createStatement();
                 PreparedStatement preparedStatement = con.prepareStatement(SELECT_CLIENTE)) {
             preparedStatement.setString(1, email);
             try (ResultSet resultado = preparedStatement.executeQuery()) {
 
                 if (resultado.next()) {
-                    int idCliente = resultado.getInt("id");
-                    String dniCliente = resultado.getString("dni");
-                    String nombreCliente = resultado.getString("nombre");
-                    String dirreccionCliente = resultado.getString("direccion");
-                    String emailCliente = resultado.getString("email");
-                    String passwordCliente = resultado.getString("password");
-                    Boolean adminCliente = resultado.getBoolean("admin");
-                    String telefonoCliente = resultado.getString("telefono");
-                    cliente = new Cliente(idCliente, dniCliente, nombreCliente, dirreccionCliente,
-                            telefonoCliente, passwordCliente, emailCliente, adminCliente);
+                    cliente = buildClienteFromResultSet(resultado);
                 }
-
             }
-
         }
         return cliente;
     }
@@ -65,7 +51,6 @@ public class JdbcClienteDAO implements InnerClienteDAO {
     public Cliente login(String password, String nombre) throws SQLException, ClassNotFoundException {
 
         Cliente cliente = null;
-
         try (Connection con = new Conexion().getConexion();
                 Statement statement = con.createStatement();
                 PreparedStatement preparedStatement = con.prepareStatement(SELECT_LOGIN_CLIENTE)) {
@@ -75,63 +60,78 @@ public class JdbcClienteDAO implements InnerClienteDAO {
             try (ResultSet resultado = preparedStatement.executeQuery()) {
 
                 if (resultado.next()) {
-                    int idCliente = resultado.getInt("id");
-                    String dniCliente = resultado.getString("dni");
-                    String nombreCliente = resultado.getString("nombre");
-                    String dirreccionCliente = resultado.getString("direccion");
-                    String emailCliente = resultado.getString("email");
-                    String passwordCliente = resultado.getString("password");
-                    Boolean adminCliente = resultado.getBoolean("admin");
-                    String telefonoCliente = resultado.getString("telefono");
-                    cliente = new Cliente(idCliente, dniCliente, nombreCliente, dirreccionCliente,
-                            telefonoCliente, passwordCliente, emailCliente, adminCliente);
+                    cliente = buildClienteFromResultSet(resultado);
                 }
 
             }
 
         }
         return cliente;
+    }
 
+    private Cliente buildClienteFromResultSet(ResultSet resultado) throws SQLException {
+        int idCliente = resultado.getInt("id");
+        String dniCliente = resultado.getString("dni");
+        String nombreCliente = resultado.getString("nombre");
+        String direccionCliente = resultado.getString("direccion");
+        String emailCliente = resultado.getString("email");
+        String passwordCliente = resultado.getString("password");
+        String telefonoCliente = resultado.getString("telefono");
+        Boolean adminCliente = resultado.getBoolean("admin");
+
+        return new Cliente(
+                idCliente,
+                dniCliente,
+                nombreCliente,
+                direccionCliente,
+                telefonoCliente,
+                passwordCliente,
+                emailCliente,
+                adminCliente);
     }
 
     @Override
-    public void update(String id, Cliente cliente) throws SQLException, ClassNotFoundException {
+    public void update(Cliente cliente) throws SQLException, ClassNotFoundException {
 
         try (Connection con = new Conexion().getConexion();
-                Statement statement = con.createStatement();
-                PreparedStatement preparedStatement = con.prepareStatement(id)) {
-
+                PreparedStatement preparedStatement = con.prepareStatement(UPDATE_CLIENTE)) {
+            preparedStatement.setString(1, cliente.getDni());
+            preparedStatement.setString(2, cliente.getNombre());
+            preparedStatement.setString(3, cliente.getDireccion());
+            preparedStatement.setString(4, cliente.getEmail());
+            preparedStatement.setString(5, cliente.getPassword());
+            preparedStatement.setBoolean(6, cliente.getAdmin());
+            preparedStatement.setString(7, cliente.getTelefono());
+            preparedStatement.setInt(8, cliente.getId());
+            preparedStatement.executeUpdate();
         }
     }
 
     @Override
     public List<Cliente> getAllCliente() throws SQLException, ClassNotFoundException {
 
-        List<Cliente> listadoClientes = new ArrayList<Cliente>();
-
+        List<Cliente> clientes = new ArrayList<Cliente>();
+        Cliente cliente;
         try (Connection con = new Conexion().getConexion();
-                Statement statement = con.createStatement();
                 PreparedStatement preparedStatement = con.prepareStatement(SELECT_ALL_CLIENTE)) {
 
             try (ResultSet resultado = preparedStatement.executeQuery()) {
 
-                if (resultado.next()) {
-                    int idCliente = resultado.getInt("id");
-                    String dniCliente = resultado.getString("dni");
-                    String nombreCliente = resultado.getString("nombre");
-                    String dirreccionCliente = resultado.getString("direccion");
-                    String emailCliente = resultado.getString("email");
-                    String passwordCliente = resultado.getString("password");
-                    Boolean adminCliente = resultado.getBoolean("admin");
-                    String telefonoCliente = resultado.getString("telefono");
-                    listadoClientes.add(new Cliente(idCliente, dniCliente, nombreCliente, dirreccionCliente,
-                            telefonoCliente, passwordCliente, emailCliente, adminCliente));
+                while (resultado.next()) {
+                    cliente = buildClienteFromResultSet(resultado);
+                    clientes.add(cliente);
                 }
             }
-
         }
+        return clientes;
+    }
 
-        return listadoClientes;
+    @Override
+    public void delete(int idCliente) throws SQLException, ClassNotFoundException {
+        try (Connection con = new Conexion().getConexion();
+                PreparedStatement preparedStatement = con.prepareStatement(DELETE_CLIENTE)) {
+            preparedStatement.setInt(1, idCliente);
+        }
     }
 
 }

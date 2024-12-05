@@ -1,5 +1,6 @@
 package pizzeria.Controller.dao.impl;
 
+import static pizzeria.utils.DatabaseConfig.DELETE_PEDIDO;
 import static pizzeria.utils.DatabaseConfig.INSERT_PEDIDO;
 import static pizzeria.utils.DatabaseConfig.SELECT_PEDIDO_ESTADO;
 import static pizzeria.utils.DatabaseConfig.SELECT_PEDIDO_ID;
@@ -22,31 +23,42 @@ import pizzeria.Modelo.LineaPedido;
 import pizzeria.Modelo.Pagable;
 import pizzeria.Modelo.Pedido;
 import pizzeria.Modelo.Producto;
-import pizzeria.Controller.dao.impl.JdbcLineaPedido;
+
 
 public class JdbcPedidoDAO implements InnerPedido {
 
-    JdbcLineaPedido jdbcLineaPedido = new JdbcLineaPedido();
+    private final JdbcLineaPedido jdbcLineaPedido = new JdbcLineaPedido();
 
     @Override
     public void save(int idCliente, Pedido pedido) throws ClassNotFoundException, SQLException {
-        try (Connection con = new Conexion().getConexion();
-                PreparedStatement preparedStatement = con.prepareStatement(INSERT_PEDIDO,
-                        Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection con = new Conexion().getConexion()) {
+            con.setAutoCommit(false); 
+            try {
+                int idPedido = insertarPedido(con, idCliente, pedido);
 
+
+                for (LineaPedido lineaPedido : pedido.getListaLineaPedidos()) {
+                    jdbcLineaPedido.save(con, lineaPedido.getProducto().getId(), idPedido, lineaPedido.getCantidad());
+                }
+            } catch (SQLException e) {
+                con.rollback(); 
+                throw new RuntimeException("Error al guardar el pedido: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    private int insertarPedido(Connection con, int idCliente, Pedido pedido) throws SQLException {
+        try (PreparedStatement preparedStatement = con.prepareStatement(INSERT_PEDIDO,
+                Statement.RETURN_GENERATED_KEYS)) {
             java.sql.Date sqlDate = new java.sql.Date(pedido.getFecha().getTime());
             preparedStatement.setDate(1, sqlDate);
             preparedStatement.setInt(2, idCliente);
             preparedStatement.setString(3, pedido.getEstado().getValue());
             preparedStatement.executeUpdate();
-            int idPedido = 0;
+
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    idPedido = generatedKeys.getInt(1);
-                    for (LineaPedido lineaPedido : pedido.getListaLineaPedidos()) {
-                        jdbcLineaPedido.save(con, lineaPedido.getProducto().getId(), idPedido,
-                                lineaPedido.getCantidad());
-                    }
+                    return generatedKeys.getInt(1);
                 } else {
                     throw new SQLException("No se pudo obtener el ID generado para el pedido.");
                 }
@@ -56,76 +68,55 @@ public class JdbcPedidoDAO implements InnerPedido {
 
     @Override
     public List<Pedido> getAllPedidoByEstado(EstadoPedido estado) throws ClassNotFoundException, SQLException {
-        List<Pedido> listaLineaPedidos = new ArrayList<Pedido>();
-
-        try (Connection con = new Conexion().getConexion();
-                PreparedStatement preparedStatement = con.prepareStatement(SELECT_PEDIDO_ESTADO);) {
-
-            preparedStatement.setString(1, estado.getValue());
-
-            try (ResultSet resultado = preparedStatement.executeQuery()) {
-
-                while (resultado.next()) {
-                    int id = resultado.getInt("id");
-                    Date fecha = resultado.getDate("fecha");
-                    String estadoPedido = resultado.getString("estadopedido");
-                    int idProducto = resultado.getInt("id_producto");
-                    List<LineaPedido> listaLineaPedido = jdbcLineaPedido.getAllLineaPedidonbyID(id);
-
-                    Pedido pedido = new Pedido(id, fecha, EstadoPedido.valueOf(estadoPedido), listaLineaPedido);
-                    listaLineaPedidos.add(pedido);
-                }
-            }
-
-        }
-
-        return listaLineaPedidos;
+        return getAllPedidos(SELECT_PEDIDO_ESTADO, ps -> ps.setString(1, estado.getValue()));
     }
 
+    @Override
     public List<Pedido> getAllPedidoByIdCliente(int idCliente) throws ClassNotFoundException, SQLException {
-        List<Pedido> listaLineaPedidos = new ArrayList<Pedido>();
+        return getAllPedidos(SELECT_PEDIDO_ID, ps -> ps.setInt(1, idCliente));
+    }
 
+    private List<Pedido> getAllPedidos(String query, PreparedStatementSetter setter)
+            throws ClassNotFoundException, SQLException {
+        List<Pedido> listaPedidos = new ArrayList<>();
         try (Connection con = new Conexion().getConexion();
-                PreparedStatement preparedStatement = con.prepareStatement(SELECT_PEDIDO_ID)) {
+                PreparedStatement preparedStatement = con.prepareStatement(query)) {
 
-            preparedStatement.setInt(1, idCliente);
+            setter.setValues(preparedStatement);
 
             try (ResultSet resultado = preparedStatement.executeQuery()) {
-
                 while (resultado.next()) {
-                    int id = resultado.getInt("id");
-                    Date fecha = resultado.getDate("fecha");
-                    String estadoPedido = resultado.getString("estadopedido");
-                    int idProducto = resultado.getInt("id_producto");
-                    List<LineaPedido> listaLineaPedido = jdbcLineaPedido.getAllLineaPedidonbyID(id);
-
-                    Pedido pedido = new Pedido(id, fecha, EstadoPedido.valueOf(estadoPedido), listaLineaPedido);
-                    listaLineaPedidos.add(pedido);
+                    listaPedidos.add(buildPedidoFromResultSet(con, resultado));
                 }
             }
-
         }
-        return listaLineaPedidos;
+        return listaPedidos;
     }
 
-    public void addCarrito(Pedido pedido, Producto producto, int cantidad) throws ClassNotFoundException, SQLException {
-        jdbcLineaPedido.save(new Conexion().getConexion(), producto.getId(), pedido.getId(),
-                cantidad);
+    private Pedido buildPedidoFromResultSet(Connection con, ResultSet resultado)
+            throws SQLException, ClassNotFoundException {
+        int id = resultado.getInt("id");
+        Date fecha = resultado.getDate("fecha");
+        String estadoPedido = resultado.getString("estadopedido");
+
+        List<LineaPedido> listaLineaPedido = jdbcLineaPedido.getAllLineaPedidonbyID(id);
+
+        return new Pedido(id, fecha, EstadoPedido.valueOf(estadoPedido), listaLineaPedido);
     }
 
+    @Override
     public void updatePedidoEstadoAndPagable(Pedido pedido, Pagable pagable)
             throws ClassNotFoundException, SQLException {
-
         try (Connection con = new Conexion().getConexion();
                 PreparedStatement preparedStatement = con.prepareStatement(UPDATE_PEDIDO_ESTADO_AND_PAGO)) {
             preparedStatement.setString(1, pedido.getEstado().getValue());
             preparedStatement.setInt(2, pagable.pagar());
             preparedStatement.setInt(3, pedido.getId());
             preparedStatement.executeUpdate();
-
         }
     }
 
+    @Override
     public void updatePedidoEstado(Pedido pedido) throws SQLException, ClassNotFoundException {
         try (Connection con = new Conexion().getConexion();
                 PreparedStatement preparedStatement = con.prepareStatement(UPDATE_PEDIDO_ESTADO)) {
@@ -135,4 +126,24 @@ public class JdbcPedidoDAO implements InnerPedido {
         }
     }
 
+    @Override
+    public void deleted(int idPedido) throws ClassNotFoundException, SQLException {
+        try (Connection con = new Conexion().getConexion();
+                PreparedStatement preparedStatement = con.prepareStatement(DELETE_PEDIDO)) {
+            preparedStatement.setInt(1, idPedido);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    @Override
+    public void addCarrito(Pedido pedido, Producto producto, int cantidad) throws ClassNotFoundException, SQLException {
+        try (Connection con = new Conexion().getConexion()) {
+            jdbcLineaPedido.save(con, producto.getId(), pedido.getId(), cantidad);
+        }
+    }
+
+    @FunctionalInterface
+    private interface PreparedStatementSetter {
+        void setValues(PreparedStatement ps) throws SQLException;
+    }
 }

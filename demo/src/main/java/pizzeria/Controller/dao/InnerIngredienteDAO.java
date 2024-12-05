@@ -11,6 +11,6 @@ public interface InnerIngredienteDAO {
         public void save(Connection con, int id_producto, Ingredientes ingrediente)
                         throws SQLException, ClassNotFoundException;
 
-        public List<Ingredientes> getAllIngredienteByidProducto(Connection con , int id); 
+        public List<Ingredientes> getAllIngredientesByIdProducto(Connection con, int id)   throws SQLException, ClassNotFoundException;
 
 }

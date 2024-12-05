@@ -53,10 +53,10 @@ public class DatabaseConfig {
                   "    OR (? IS NULL AND producto.size IS NULL)\n" + //
                   ");";
 
-      public static final String UPDATE_CLIENTE = "UPDATE cliente SET nombre = ? ,  ";
+      public static final String UPDATE_CLIENTE = "UPDATE cliente SET  dni = ?  ,nombre = ? direccion = ? , email = ? , password = ? , admin = ? , telefono = ?  where id= ?";
       public static final String UPDATE_PEDIDO_ESTADO_AND_PAGO = "UPDATE pedido SET estadopedido = ? , metodopago = ?  where id = ? ";
       public static final String UPDATE_PEDIDO_ESTADO = "UPDATE pedido SET estadopedido = ?  where id = ? ";
-      public static final String UPDATE_PRODUCTO = "UPDATE producto SET nombre = ? , precio = ? , tipo = ? , size = ? ";
+      public static final String UPDATE_PRODUCTO = "UPDATE producto SET nombre = ? , precio = ? , tipo = ? , size = ?  where id = ?";
 
       static final String DROP_TABLE_CLIENTE = "DROP TABLE IF EXISTS cliente";
       static final String DROP_INGREDIENTE_ALERGENO = "DROP TABLE IF EXISTS ingrediente_alergeno";
