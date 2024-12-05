@@ -4,6 +4,7 @@ import static pizzeria.utils.DatabaseConfig.DELETE_PEDIDO;
 import static pizzeria.utils.DatabaseConfig.INSERT_PEDIDO;
 import static pizzeria.utils.DatabaseConfig.SELECT_PEDIDO_ESTADO;
 import static pizzeria.utils.DatabaseConfig.SELECT_PEDIDO_ID;
+import static pizzeria.utils.DatabaseConfig.UPDATE_PEDIDO;
 import static pizzeria.utils.DatabaseConfig.UPDATE_PEDIDO_ESTADO;
 import static pizzeria.utils.DatabaseConfig.UPDATE_PEDIDO_ESTADO_AND_PAGO;
 
@@ -17,13 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pizzeria.Controller.dao.InnerPedido;
+import pizzeria.Modelo.Cliente;
 import pizzeria.Modelo.Conexion;
 import pizzeria.Modelo.EstadoPedido;
 import pizzeria.Modelo.LineaPedido;
 import pizzeria.Modelo.Pagable;
+import pizzeria.Modelo.PagarEfectivo;
+import pizzeria.Modelo.PagarTarjeta;
 import pizzeria.Modelo.Pedido;
 import pizzeria.Modelo.Producto;
-
 
 public class JdbcPedidoDAO implements InnerPedido {
 
@@ -32,14 +35,15 @@ public class JdbcPedidoDAO implements InnerPedido {
     @Override
     public void save(int idCliente, Pedido pedido) throws ClassNotFoundException, SQLException {
         try (Connection con = new Conexion().getConexion()) {
-            con.setAutoCommit(false); 
+            con.setAutoCommit(false);
             try {
                 int idPedido = insertarPedido(con, idCliente, pedido);
                 for (LineaPedido lineaPedido : pedido.getListaLineaPedidos()) {
                     jdbcLineaPedido.save(con, lineaPedido.getProducto().getId(), idPedido, lineaPedido.getCantidad());
                 }
+                con.commit();
             } catch (SQLException e) {
-                con.rollback(); 
+                con.rollback();
                 throw new RuntimeException("Error al guardar el pedido: " + e.getMessage(), e);
             }
         }
@@ -52,6 +56,7 @@ public class JdbcPedidoDAO implements InnerPedido {
             preparedStatement.setDate(1, sqlDate);
             preparedStatement.setInt(2, idCliente);
             preparedStatement.setString(3, pedido.getEstado().getValue());
+            preparedStatement.setNull(4, java.sql.Types.NULL);
             preparedStatement.executeUpdate();
 
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
@@ -65,8 +70,12 @@ public class JdbcPedidoDAO implements InnerPedido {
     }
 
     @Override
-    public List<Pedido> getAllPedidoByEstado(EstadoPedido estado) throws ClassNotFoundException, SQLException {
-        return getAllPedidos(SELECT_PEDIDO_ESTADO, ps -> ps.setString(1, estado.getValue()));
+    public List<Pedido> getAllPedidoByEstado(EstadoPedido estado, Cliente cliente)
+            throws ClassNotFoundException, SQLException {
+        return getAllPedidos(SELECT_PEDIDO_ESTADO, ps -> {
+            ps.setString(1, estado.getValue());
+            ps.setInt(2, cliente.getId());
+        });
     }
 
     @Override
@@ -96,10 +105,24 @@ public class JdbcPedidoDAO implements InnerPedido {
         int id = resultado.getInt("id");
         Date fecha = resultado.getDate("fecha");
         String estadoPedido = resultado.getString("estadopedido");
+        Pagable pagable = null;
+        int metododepago = resultado.getInt("metodopago");
+
+        switch (metododepago) {
+            case 1:
+                pagable = new PagarEfectivo();
+                break;
+            case 2:
+                pagable = new PagarTarjeta();
+                break;
+
+            default:
+                break;
+        }
 
         List<LineaPedido> listaLineaPedido = jdbcLineaPedido.getAllLineaPedidonbyID(id);
 
-        return new Pedido(id, fecha, EstadoPedido.valueOf(estadoPedido), listaLineaPedido);
+        return new Pedido(id, fecha, EstadoPedido.valueOf(estadoPedido), listaLineaPedido, pagable);
     }
 
     @Override
@@ -144,4 +167,28 @@ public class JdbcPedidoDAO implements InnerPedido {
     private interface PreparedStatementSetter {
         void setValues(PreparedStatement ps) throws SQLException;
     }
+
+    @Override
+    public void update(Pedido pedido) {
+        String UPDATE_PEDIDO = "UPDATE pedido SET fecha = ?, estadopedido = ?, metodopago = ? WHERE id = ?";
+        try (Connection con = new Conexion().getConexion();
+                PreparedStatement preparedStatement = con.prepareStatement(UPDATE_PEDIDO)) {
+
+            // Configurar los parámetros del PreparedStatement
+            preparedStatement.setDate(1, new Date(pedido.getFecha().getTime()));
+            preparedStatement.setString(2, pedido.getEstado().getValue());
+            if (pedido.getPagable() != null) {
+                preparedStatement.setInt(3, pedido.getPagable().pagar());
+            } else {
+                preparedStatement.setObject(3, null);
+            }
+            preparedStatement.setInt(4, pedido.getId());
+
+            // Ejecutar la actualización
+            preparedStatement.executeUpdate();
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException("Error al actualizar el pedido: " + e.getMessage(), e);
+        }
+    }
+
 }

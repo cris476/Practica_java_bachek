@@ -1,6 +1,7 @@
 package pizzeria.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static pizzeria.utils.DatabaseConfig.CREATE_ALL_TABLES;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class ControladorProductoTest {
 
     @BeforeEach
     void setUp() throws ClassNotFoundException, SQLException {
+        CREATE_ALL_TABLES();
         controladorProducto = new ControladorProducto();
     }
 

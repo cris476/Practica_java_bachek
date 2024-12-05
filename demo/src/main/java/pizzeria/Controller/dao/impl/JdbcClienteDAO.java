@@ -49,24 +49,25 @@ public class JdbcClienteDAO implements InnerClienteDAO {
 
     @Override
     public Cliente login(String password, String nombre) throws SQLException, ClassNotFoundException {
-
         Cliente cliente = null;
+
+        // Utiliza solo PreparedStatement sin Statement adicional
         try (Connection con = new Conexion().getConexion();
-                Statement statement = con.createStatement();
                 PreparedStatement preparedStatement = con.prepareStatement(SELECT_LOGIN_CLIENTE)) {
-            preparedStatement.setString(1, nombre);
-            preparedStatement.setString(2, password);
+            con.setAutoCommit(false);
+            // Configuración de parámetros en la consulta
+            preparedStatement.setString(1, nombre); // Nombre del cliente (suponiendo que sea el email o nombre)
+            preparedStatement.setString(2, password); // Contraseña
 
             try (ResultSet resultado = preparedStatement.executeQuery()) {
-
                 if (resultado.next()) {
+                    // Si se encuentra el cliente, construimos el objeto cliente
                     cliente = buildClienteFromResultSet(resultado);
                 }
-
             }
-
+            con.commit();
         }
-        return cliente;
+        return cliente; // Devuelve el cliente si se encontró, o null si no se encontró
     }
 
     private Cliente buildClienteFromResultSet(ResultSet resultado) throws SQLException {

@@ -63,7 +63,7 @@ public class JdbcIngredienteDAOTest {
         ingredientesPizza.add(new Ingredientes("Queso Mozzarella", alergenosQueso));
         ingredientesPizza.add(new Ingredientes("Peperonni", alergenosQueso));
 
-        List<Ingredientes> listaIngredientes = jdbcIngrediente.getAllIngredienteByidProducto(con, 66);
+        List<Ingredientes> listaIngredientes = jdbcIngrediente.getAllIngredientesByIdProducto(con, 66);
 
         assertEquals(ingredientesPizza.size() , listaIngredientes.size());
     }

@@ -1,117 +1,346 @@
-// package pizzeria.controller;
+package pizzeria.controller;
 
-// import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static pizzeria.utils.DatabaseConfig.CREATE_ALL_TABLES;
 
-// import java.sql.SQLException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-// import pizzeria.Controller.ContraladorPedido;
-// import pizzeria.Modelo.EstadoPedido;
-// import pizzeria.Modelo.Pedido;
-// import pizzeria.Modelo.Producto;
+import pizzeria.Controller.ContraladorCliente;
+import pizzeria.Controller.ContraladorPedido;
+import pizzeria.Controller.ControladorProducto;
+import pizzeria.Controller.dao.impl.JdbcPedidoDAO;
+import pizzeria.Exceptions.ExceptionFoundCliente;
+import pizzeria.Modelo.Alergeno;
+import pizzeria.Modelo.Cliente;
+import pizzeria.Modelo.EstadoPedido;
+import pizzeria.Modelo.Ingredientes;
+import pizzeria.Modelo.LineaPedido;
+import pizzeria.Modelo.PagarTarjeta;
+import pizzeria.Modelo.Pedido;
+import pizzeria.Modelo.Pizza;
+import pizzeria.Modelo.Producto;
+import pizzeria.Modelo.SizeApp;
 
-// public class ContraladorPedidoTest {
+public class ContraladorPedidoTest {
 
-// private ContraladorPedido controladorPedido;
+    private ContraladorPedido contraladorPedido;
+    private ContraladorCliente contraladorCliente;
+    private ControladorProducto controladorProducto;
 
-// @BeforeEach
-// void setUp() throws ClassNotFoundException, SQLException {
-// controladorPedido = new ContraladorPedido();
-// }
+    @BeforeEach
+    void setUp() throws ClassNotFoundException, SQLException {
+        CREATE_ALL_TABLES();
+        contraladorPedido = new ContraladorPedido();
+        contraladorCliente = new ContraladorCliente();
+        controladorProducto = new ControladorProducto();
+    }
 
-// @Test
-// void testAddCarrito() throws ClassNotFoundException, SQLException {
-// // Crear un pedido
-// Pedido pedido = controladorPedido.savePedido(1); // Cliente con ID 1
-// Producto producto = new Producto("Producto Test", 10.0);
+    @Test
+    void testAddCarrito() throws ClassNotFoundException, SQLException, ExceptionFoundCliente {
 
-// // Agregar producto al carrito
-// controladorPedido.addCarrito(pedido, producto, 3); // Cantidad 3
+        Cliente cliente = new Cliente(
+                "14341211678A", // DNI
+                "Juan Pérez1895", // Nombre
+                "Calle Falsa 123", // Dirección
+                "987654321", // Teléfono
+                "juan.perez@24121ail.com", // Email
+                "passwor164", // Contraseña
+                false // Admin (false = no es administrador)
+        );
 
-// // Verificar que el producto está en el carrito
-// Pedido pedidoConProductos =
-// controladorPedido.obtenerPedidoPorId(pedido.getId());
-// assertNotNull(pedidoConProductos);
-// assertEquals(1, pedidoConProductos.getListaLineaPedidos().size());
-// assertEquals("Producto Test",
-// pedidoConProductos.getListaLineaPedidos().get(0).getProducto().getNombre());
-// assertEquals(3,
-// pedidoConProductos.getListaLineaPedidos().get(0).getCantidad());
-// }
+        contraladorCliente.registrarCliente(cliente);
 
-// @Test
-// void testCancelarPedido() throws ClassNotFoundException, SQLException {
-// // Crear y guardar un pedido
-// Pedido pedido = controladorPedido.crearPedido(1);
-// controladorPedido.savePedido(pedido);
+        Cliente clienteExiste = contraladorCliente.loginCliente("Juan Pérez1895", "passwor164");
+        // Crear ingredientes y alérgenos
+        List<Alergeno> alergenos = new ArrayList<>();
+        alergenos.add(new Alergeno("Gluten"));
 
-// // Cancelar el pedido
-// controladorPedido.cancelarPedido(pedido.getId());
+        Ingredientes tomate = new Ingredientes("Tomate", alergenos);
+        Ingredientes queso = new Ingredientes("Queso", new ArrayList<>());
 
-// // Verificar que el estado del pedido sea "CANCELADO"
-// Pedido pedidoCancelado =
-// controladorPedido.obtenerPedidoPorId(pedido.getId());
-// assertEquals(EstadoPedido.CANCELADO, pedidoCancelado.getEstado());
-// }
+        // Crear lista de ingredientes
+        List<Ingredientes> ingredientesPizza = new ArrayList<>();
+        ingredientesPizza.add(tomate);
+        ingredientesPizza.add(queso);
 
-// @Test
-// void testEliminarPedido() throws ClassNotFoundException, SQLException {
-// // Crear y guardar un pedido
-// Pedido pedido = controladorPedido.crearPedido(1);
-// controladorPedido.savePedido(pedido);
+        // Crear pizza y línea de pedido
+        Pizza pizza = new Pizza("Margarita", 12.5, SizeApp.MEDIANO, ingredientesPizza);
 
-// // Eliminar el pedido
-// controladorPedido.eliminarPedido(pedido.getId());
+        controladorProducto.saveProduct(pizza);
+        List<Producto> listaPedido = controladorProducto.getAllProducts();
+        Producto productoAsignado = listaPedido.stream().filter(t -> t.getNombre().equals("Margarita")).findFirst()
+                .orElse(null);
 
-// // Verificar que el pedido ya no existe
-// Pedido pedidoEliminado =
-// controladorPedido.obtenerPedidoPorId(pedido.getId());
-// assertNull(pedidoEliminado);
-// }
+        contraladorPedido.addCarrito(productoAsignado, 13, clienteExiste);
+    }
 
-// @Test
-// void testEntregarPedido() throws ClassNotFoundException, SQLException {
-// // Crear y guardar un pedido
-// Pedido pedido = controladorPedido.crearPedido(1);
-// controladorPedido.savePedido(pedido);
+    @Test
+    void testCancelarPedido() throws ClassNotFoundException, SQLException, ExceptionFoundCliente {
 
-// // Cambiar estado a "ENTREGADO"
-// controladorPedido.entregarPedido(pedido.getId());
+        Cliente cliente = new Cliente(
+                "14312121678A", // DNI
+                "Juan Pérez444", // Nombre
+                "Calle Falsa 123", // Dirección
+                "987654321", // Teléfono
+                "juan.perez@243121ail.com", // Email
+                "passwor131", // Contraseña
+                false // Admin (false = no es administrador)
+        );
 
-// // Verificar que el estado del pedido sea "ENTREGADO"
-// Pedido pedidoEntregado =
-// controladorPedido.obtenerPedidoPorId(pedido.getId());
-// assertEquals(EstadoPedido.ENTREGADO, pedidoEntregado.getEstado());
-// }
+        contraladorCliente.registrarCliente(cliente);
 
-// @Test
-// void testFinalizarPedido() throws ClassNotFoundException, SQLException {
-// // Crear y guardar un pedido
-// Pedido pedido = controladorPedido.crearPedido(1);
-// controladorPedido.savePedido(pedido);
+        Cliente clienteExiste = contraladorCliente.loginCliente("Juan Pérez444", "passwor131");
 
-// // Cambiar estado a "FINALIZADO"
-// controladorPedido.finalizarPedido(pedido.getId());
+        // Crear ingredientes y alérgenos
+        List<Alergeno> alergenos = new ArrayList<>();
+        alergenos.add(new Alergeno("Gluten"));
 
-// // Verificar que el estado del pedido sea "FINALIZADO"
-// Pedido pedidoFinalizado =
-// controladorPedido.obtenerPedidoPorId(pedido.getId());
-// assertEquals(EstadoPedido.FINALIZADO, pedidoFinalizado.getEstado());
-// }
+        Ingredientes tomate = new Ingredientes("Tomate", alergenos);
+        Ingredientes queso = new Ingredientes("Queso", new ArrayList<>());
 
-// @Test
-// void testSavePedido() throws ClassNotFoundException, SQLException {
-// // Crear un pedido
-// Pedido pedido = controladorPedido.crearPedido(1);
+        // Crear lista de ingredientes
+        List<Ingredientes> ingredientesPizza = new ArrayList<>();
+        ingredientesPizza.add(tomate);
+        ingredientesPizza.add(queso);
 
-// // Guardar el pedido
-// controladorPedido.savePedido(pedido);
+        // Crear pizza y línea de pedido
+        Pizza pizza = new Pizza("Margarita", 12.5, SizeApp.MEDIANO, ingredientesPizza);
+        controladorProducto.saveProduct(pizza);
+        List<Producto> listaPedido = controladorProducto.getAllProducts();
+        Producto productoAsignado = listaPedido.stream().filter(t -> t.getNombre().equals("Margarita")).findFirst()
+                .orElse(null);
 
-// // Verificar que el pedido se guardó correctamente
-// Pedido pedidoGuardado = controladorPedido.obtenerPedidoPorId(pedido.getId());
-// assertNotNull(pedidoGuardado);
-// assertEquals(pedido.getId(), pedidoGuardado.getId());
-// }
-// }
+        LineaPedido lineaPedido = new LineaPedido(2, productoAsignado);
+
+        // Crear lista de líneas de pedido
+        List<LineaPedido> listaLineaPedidos = new ArrayList<>();
+        listaLineaPedidos.add(lineaPedido);
+
+        // Crear pedido
+        Pedido pedido = new Pedido(new Date(), EstadoPedido.PENDIENTE, listaLineaPedidos, clienteExiste);
+
+        // Guardar pedido
+        contraladorPedido.savePedido(pedido);
+
+        contraladorPedido.cancelarPedido(clienteExiste);
+
+    }
+
+    @Test
+    void testEliminarPedido() throws ClassNotFoundException, SQLException, ExceptionFoundCliente {
+
+        Cliente cliente = new Cliente(
+                "21125467112", // DNI
+                "Juan Pérez3412", // Nombre
+                "Calle Falsa 123", // Dirección
+                "987654321", // Teléfono
+                "juansolo@g3123232322l.com", // Email
+                "password12", // Contraseña
+                false // Admin (false = no es administrador)
+        );
+
+        contraladorCliente.registrarCliente(cliente);
+
+        Cliente clienteExiste = contraladorCliente.loginCliente("Juan Pérez3412", "password12");
+
+        // Crear pedido
+        // Crear ingredientes y alérgenos
+        List<Alergeno> alergenos = new ArrayList<>();
+        alergenos.add(new Alergeno("Gluten"));
+
+        Ingredientes tomate = new Ingredientes("Tomate", alergenos);
+        Ingredientes queso = new Ingredientes("Queso", new ArrayList<>());
+
+        // Crear lista de ingredientes
+        List<Ingredientes> ingredientesPizza = new ArrayList<>();
+        ingredientesPizza.add(tomate);
+        ingredientesPizza.add(queso);
+
+        // Crear pizza y línea de pedido
+        Pizza pizza = new Pizza(1, "Margarita", 12.5, SizeApp.MEDIANO, ingredientesPizza);
+
+        controladorProducto.saveProduct(pizza);
+        List<Producto> listaPedido = controladorProducto.getAllProducts();
+        Producto productoAsignado = listaPedido.stream().filter(t -> t.getNombre().equals("Margarita")).findFirst()
+                .orElse(null);
+        LineaPedido lineaPedido = new LineaPedido(2, productoAsignado);
+
+        // Crear lista de líneas de pedido
+        List<LineaPedido> listaLineaPedidos = new ArrayList<>();
+        listaLineaPedidos.add(lineaPedido);
+        // Crear pedido
+        Pedido pedido = new Pedido(new Date(), EstadoPedido.PENDIENTE, listaLineaPedidos,
+                clienteExiste);
+
+        contraladorPedido.savePedido(pedido);
+
+        // Obtener todos los pedidos por estado
+        List<Pedido> pedidos = contraladorPedido.getAllPedidoByEstado(EstadoPedido.PENDIENTE, clienteExiste);
+        // Eliminar pedido
+        Pedido pedidoExiste = pedidos.stream()
+                .filter((itemPedido) -> itemPedido.getEstado() == EstadoPedido.PENDIENTE).findFirst()
+                .orElse(null);
+        // elimiar el pedido
+
+        contraladorPedido.eliminarPedido(pedidoExiste.getId());
+        List<Pedido> pedidosExiste = contraladorPedido.getAllPedidoByEstado(EstadoPedido.PENDIENTE, clienteExiste);
+        // Verificar que se eliminó
+        assertTrue(pedidosExiste.isEmpty());
+    }
+
+    @Test
+    void testEntregarPedido() throws ClassNotFoundException, SQLException, ExceptionFoundCliente {
+
+        Cliente cliente = new Cliente(
+                "1424323121678A", // DNI
+                "Juan Pérez122", // Nombre
+                "Calle Falsa 123", // Dirección
+                "987654321", // Teléfono
+                "juan.perez@2121ail.com", // Email
+                "password43", // Contraseña
+                false // Admin (false = no es administrador)
+        );
+
+        contraladorCliente.registrarCliente(cliente);
+
+        Cliente clienteExiste = contraladorCliente.loginCliente("Juan Pérez122", "password43");
+
+        // Crear ingredientes y alérgenos
+        List<Alergeno> alergenos = new ArrayList<>();
+        alergenos.add(new Alergeno("Gluten"));
+
+        Ingredientes tomate = new Ingredientes("Tomate", alergenos);
+        Ingredientes queso = new Ingredientes("Queso", new ArrayList<>());
+
+        // Crear lista de ingredientes
+        List<Ingredientes> ingredientesPizza = new ArrayList<>();
+        ingredientesPizza.add(tomate);
+        ingredientesPizza.add(queso);
+
+        // Crear pizza y línea de pedido
+        Pizza pizza = new Pizza(1, "Margarita", 12.5, SizeApp.MEDIANO, ingredientesPizza);
+        controladorProducto.saveProduct(pizza);
+        List<Producto> listaPedido = controladorProducto.getAllProducts();
+        Producto productoAsignado = listaPedido.stream().filter(t -> t.getNombre().equals("Margarita")).findFirst()
+                .orElse(null);
+        LineaPedido lineaPedido = new LineaPedido(2, productoAsignado);
+
+        // Crear lista de líneas de pedido
+        List<LineaPedido> listaLineaPedidos = new ArrayList<>();
+        listaLineaPedidos.add(lineaPedido);
+
+        // Crear pedido
+        Pedido pedido = new Pedido(new Date(), EstadoPedido.PENDIENTE, listaLineaPedidos, clienteExiste);
+
+        // Guardar pedido
+        contraladorPedido.savePedido(pedido);
+
+        contraladorPedido.entregarPedido(clienteExiste);
+    }
+
+    @Test
+    void testFinalizarPedido() throws ClassNotFoundException, SQLException, ExceptionFoundCliente {
+
+        Cliente cliente = new Cliente(
+                "142112121678A", // DNI
+                "Juan Pérez6432", // Nombre
+                "Calle Falsa 123", // Dirección
+                "987654321", // Teléfono
+                "juan.perez@5451221l.com", // Email
+                "password5364", // Contraseña
+                false // Admin (false = no es administrador)
+        );
+
+        contraladorCliente.registrarCliente(cliente);
+
+        Cliente clienteExiste = contraladorCliente.loginCliente("Juan Pérez6432", "password5364");
+
+        // Crear ingredientes y alérgenos
+        List<Alergeno> alergenos = new ArrayList<>();
+        alergenos.add(new Alergeno("Gluten"));
+
+        Ingredientes tomate = new Ingredientes("Tomate", alergenos);
+        Ingredientes queso = new Ingredientes("Queso", new ArrayList<>());
+
+        // Crear lista de ingredientes
+        List<Ingredientes> ingredientesPizza = new ArrayList<>();
+        ingredientesPizza.add(tomate);
+        ingredientesPizza.add(queso);
+
+        // Crear pizza y línea de pedido
+        Pizza pizza = new Pizza(1, "Margarita", 12.5, SizeApp.MEDIANO, ingredientesPizza);
+        controladorProducto.saveProduct(pizza);
+        List<Producto> listaPedido = controladorProducto.getAllProducts();
+        Producto productoAsignado = listaPedido.stream().filter(t -> t.getNombre().equals("Margarita")).findFirst()
+                .orElse(null);
+        LineaPedido lineaPedido = new LineaPedido(2, productoAsignado);
+
+        // Crear lista de líneas de pedido
+        List<LineaPedido> listaLineaPedidos = new ArrayList<>();
+        listaLineaPedidos.add(lineaPedido);
+
+        // Crear pedido
+        Pedido pedido = new Pedido(new Date(), EstadoPedido.PENDIENTE, listaLineaPedidos, clienteExiste);
+
+        // Guardar pedido
+        contraladorPedido.savePedido(pedido);
+
+        contraladorPedido.finalizarPedido(clienteExiste, new PagarTarjeta());
+
+    }
+
+    @Test
+    void testSavePedido() throws ClassNotFoundException, SQLException, ExceptionFoundCliente {
+        Cliente cliente = new Cliente(
+                "12342121678A", // DNI
+                "Juan Pérez30", // Nombre
+                "Calle Falsa 123", // Dirección
+                "987654321", // Teléfono
+                "juan.perez@mail.com", // Email
+                "password43", // Contraseña
+                false // Admin (false = no es administrador)
+        );
+
+        contraladorCliente.registrarCliente(cliente);
+
+        Cliente clienteExiste = contraladorCliente.loginCliente("Juan Pérez30", "password43");
+
+        // Crear ingredientes y alérgenos
+        List<Alergeno> alergenos = new ArrayList<>();
+        alergenos.add(new Alergeno("Gluten"));
+
+        Ingredientes tomate = new Ingredientes("Tomate", alergenos);
+        Ingredientes queso = new Ingredientes("Queso", new ArrayList<>());
+
+        // Crear lista de ingredientes
+        List<Ingredientes> ingredientesPizza = new ArrayList<>();
+        ingredientesPizza.add(tomate);
+        ingredientesPizza.add(queso);
+
+        // Crear pizza y línea de pedido
+        Pizza pizza = new Pizza(1, "Margarita", 12.5, SizeApp.MEDIANO, ingredientesPizza);
+        controladorProducto.saveProduct(pizza);
+        List<Producto> listaPedido = controladorProducto.getAllProducts();
+        Producto productoAsignado = listaPedido.stream().filter(t -> t.getNombre().equals("Margarita")).findFirst()
+                .orElse(null);
+        LineaPedido lineaPedido = new LineaPedido(2, productoAsignado);
+
+        // Crear lista de líneas de pedido
+        List<LineaPedido> listaLineaPedidos = new ArrayList<>();
+        listaLineaPedidos.add(lineaPedido);
+
+        // Crear pedido
+        Pedido pedido = new Pedido(new Date(), EstadoPedido.PENDIENTE, listaLineaPedidos, clienteExiste);
+
+        // Guardar pedido
+        contraladorPedido.savePedido(pedido);
+
+    }
+}

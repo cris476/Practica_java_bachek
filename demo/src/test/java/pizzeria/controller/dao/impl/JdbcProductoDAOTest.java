@@ -23,13 +23,5 @@ public class JdbcProductoDAOTest {
         assertNotEquals(0, listaProductos.size());
     }
 
-    // @Test
-    // void testfindByNameAndSize() throws ClassNotFoundException, SQLException {
 
-    //     Pizza pizza = new Pizza(1, "Peperonni", 12, SizeApp.MEDIANO, null);
-
-    //     Producto producto = jdbcProductoDAO.findByNameAndSize(pizza);
-
-    //     assertEquals(0, producto.getPrecio());
-    // }
 }

@@ -24,7 +24,7 @@ public class ContraladorPedido {
         List<Pedido> listaPedido = new ArrayList<Pedido>();
         List<LineaPedido> lineaPedidos = new ArrayList<>();
 
-        listaPedido = jdbcPedidoDAO.getAllPedidoByEstado(EstadoPedido.PENDIENTE);
+        listaPedido = jdbcPedidoDAO.getAllPedidoByEstado(EstadoPedido.PENDIENTE, cliente);
 
         PedidoExistente = listaPedido.stream()
                 .filter(pedido -> pedido.getEstado() == EstadoPedido.PENDIENTE)
@@ -33,7 +33,7 @@ public class ContraladorPedido {
 
         if (PedidoExistente == null) {
             lineaPedidos.add(new LineaPedido(cantidad, producto));
-            pedidoNuevo = new Pedido( new Date(), EstadoPedido.PENDIENTE, lineaPedidos, cliente , null);
+            pedidoNuevo = new Pedido(new Date(), EstadoPedido.PENDIENTE, lineaPedidos, cliente, null);
             savePedido(pedidoNuevo);
         } else {
             jdbcPedidoDAO.addCarrito(PedidoExistente, producto, cantidad);
@@ -50,7 +50,8 @@ public class ContraladorPedido {
                 .findFirst()
                 .orElse(null);
         pedidoPendiente.setEstado(EstadoPedido.ENTREGADO);
-        jdbcPedidoDAO.updatePedidoEstadoAndPagable(pedidoPendiente, pagable);
+        pedidoPendiente.setPagable(pagable);
+        jdbcPedidoDAO.update(pedidoPendiente);
 
     }
 
@@ -75,11 +76,15 @@ public class ContraladorPedido {
                 .orElse(null);
         pedidoPendiente.setEstado(EstadoPedido.ENTREGADO);
 
-        jdbcPedidoDAO.updatePedidoEstado(pedidoPendiente);
+        jdbcPedidoDAO.update(pedidoPendiente);
     }
 
     public void eliminarPedido(int idPedido) throws ClassNotFoundException, SQLException {
         jdbcPedidoDAO.delete(idPedido);
+    }
+ 
+    public List<Pedido> getAllPedidoByEstado(EstadoPedido estadoPedido,  Cliente cliente) throws ClassNotFoundException, SQLException{
+              return  jdbcPedidoDAO.getAllPedidoByEstado(estadoPedido, cliente); 
     }
 
 }

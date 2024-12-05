@@ -12,7 +12,7 @@ import pizzeria.Controller.dao.impl.JdbcClienteDAO;
 import pizzeria.Exceptions.ExceptionFoundCliente;
 import pizzeria.Modelo.Cliente;
 import pizzeria.Modelo.Clientes;
-import pizzeria.Modelo.GestionarFicheros;
+
 import pizzeria.Modelo.Ingredientes;
 import pizzeria.Modelo.Producto;
 

@@ -10,10 +10,10 @@ public class Pedido {
     private EstadoPedido estado;
     private List<LineaPedido> listaLineaPedidos;
     private Cliente cliente;
-    private Pagable pagable; 
+    private Pagable pagable;
 
     public Pedido(int id, Date fecha, EstadoPedido estado, List<LineaPedido> listaLineaPedidos,
-            Cliente cliente , Pagable pagable) {
+            Cliente cliente, Pagable pagable) {
         this.id = id;
         this.fecha = fecha;
         this.estado = estado;
@@ -22,29 +22,35 @@ public class Pedido {
         this.pagable = pagable;
     }
 
-    public Pedido(int id, Date fecha, EstadoPedido estado, List<LineaPedido> listaLineaPedidos) {
+    public Pedido(int id, Date fecha, EstadoPedido estado, List<LineaPedido> listaLineaPedidos, Pagable pagable) {
         this.id = id;
         this.fecha = fecha;
         this.estado = estado;
         this.listaLineaPedidos = listaLineaPedidos;
-     
+
     }
 
     public Pedido(Date fecha, EstadoPedido estado, List<LineaPedido> listaLineaPedidos,
-            Cliente cliente , Pagable pagable) {
+            Cliente cliente, Pagable pagable) {
         this.fecha = fecha;
         this.estado = estado;
         this.listaLineaPedidos = listaLineaPedidos;
         this.cliente = cliente;
         this.pagable = pagable;
+    }
+
+    public Pedido(Date fecha, EstadoPedido estado, List<LineaPedido> listaLineaPedidos,
+            Cliente cliente) {
+        this.fecha = fecha;
+        this.estado = estado;
+        this.listaLineaPedidos = listaLineaPedidos;
+        this.cliente = cliente;
     }
 
     public boolean AñadirLineaPedido(LineaPedido lineaPedido) {
         this.listaLineaPedidos.add(lineaPedido);
         return true;
     }
-
-    
 
     public int getId() {
         return id;
@@ -84,6 +90,14 @@ public class Pedido {
 
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
+    }
+
+    public Pagable getPagable() {
+        return pagable;
+    }
+
+    public void setPagable(Pagable pagable) {
+        this.pagable = pagable;
     }
 
 }

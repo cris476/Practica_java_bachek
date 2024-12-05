@@ -29,7 +29,7 @@ public class JdbcLineaPedido implements InnerLineaPedidoDAO {
             preparedStatement.setInt(3, idPedido);
 
             preparedStatement.executeUpdate();
-
+            con.commit();
         }
 
     }

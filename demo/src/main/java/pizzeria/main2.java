@@ -9,7 +9,6 @@ import java.util.List;
 
 import pizzeria.Controller.ContraladorCliente;
 import pizzeria.Controller.ContraladorPedido;
-import pizzeria.Controller.ControladorIngredientes;
 import pizzeria.Modelo.Bebida;
 import pizzeria.Modelo.Cliente;
 import pizzeria.Modelo.Ingredientes;
