@@ -9,7 +9,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pizzeria.Controller.ContraladorCliente;
-import pizzeria.Controller.dao.impl.JdbcClienteDAO;
 import pizzeria.Exceptions.ExceptionFoundCliente;
 import pizzeria.Modelo.Cliente;
 import pizzeria.Modelo.Conexion;
@@ -25,7 +24,6 @@ public class ControladorClienteTest {
 
     @Test
     void testConexion() throws SQLException, Exception {
-
         Connection conexion = new Conexion().getConexion();
     }
 
@@ -61,6 +59,25 @@ public class ControladorClienteTest {
         List<Cliente> listadoCliente = null;
         listadoCliente = contraladorCliente.todosClientes();
         assertNotEquals(listadoCliente, null);
+    }
+
+    @Test
+    void testGetDeleteCliente() throws ClassNotFoundException, SQLException {
+        contraladorCliente.eliminarCliente(1);
+    }
+
+    @Test
+    void testActualizarCliente() throws ClassNotFoundException, SQLException {
+        String dni = "48642963N";
+        String nombre = "Jhon2";
+        String apellido = "Solano Macass";
+        String telefono = "698312131";
+        String email = "solanomacascristoferr@gmail.com";
+        String password = "123453";
+        Boolean admin = false;
+
+        Cliente cliente = new Cliente(1, dni, nombre, apellido, telefono, email, password, admin);
+        contraladorCliente.actualizarCliente(cliente);
     }
 
 }

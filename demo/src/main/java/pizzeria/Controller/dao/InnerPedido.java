@@ -24,6 +24,6 @@ public interface InnerPedido {
 
     public List<Pedido> getAllPedidoByIdCliente(int idCliente) throws ClassNotFoundException, SQLException;
 
-    public void deleted(int idPedido) throws ClassNotFoundException, SQLException;
+    public void delete(int idPedido) throws ClassNotFoundException, SQLException;
 
 }

@@ -35,8 +35,6 @@ public class JdbcPedidoDAO implements InnerPedido {
             con.setAutoCommit(false); 
             try {
                 int idPedido = insertarPedido(con, idCliente, pedido);
-
-
                 for (LineaPedido lineaPedido : pedido.getListaLineaPedidos()) {
                     jdbcLineaPedido.save(con, lineaPedido.getProducto().getId(), idPedido, lineaPedido.getCantidad());
                 }
@@ -127,7 +125,7 @@ public class JdbcPedidoDAO implements InnerPedido {
     }
 
     @Override
-    public void deleted(int idPedido) throws ClassNotFoundException, SQLException {
+    public void delete(int idPedido) throws ClassNotFoundException, SQLException {
         try (Connection con = new Conexion().getConexion();
                 PreparedStatement preparedStatement = con.prepareStatement(DELETE_PEDIDO)) {
             preparedStatement.setInt(1, idPedido);

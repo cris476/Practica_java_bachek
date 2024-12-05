@@ -10,14 +10,16 @@ public class Pedido {
     private EstadoPedido estado;
     private List<LineaPedido> listaLineaPedidos;
     private Cliente cliente;
+    private Pagable pagable; 
 
     public Pedido(int id, Date fecha, EstadoPedido estado, List<LineaPedido> listaLineaPedidos,
-            Cliente cliente) {
+            Cliente cliente , Pagable pagable) {
         this.id = id;
         this.fecha = fecha;
         this.estado = estado;
         this.listaLineaPedidos = listaLineaPedidos;
         this.cliente = cliente;
+        this.pagable = pagable;
     }
 
     public Pedido(int id, Date fecha, EstadoPedido estado, List<LineaPedido> listaLineaPedidos) {
@@ -25,15 +27,16 @@ public class Pedido {
         this.fecha = fecha;
         this.estado = estado;
         this.listaLineaPedidos = listaLineaPedidos;
-
+     
     }
 
     public Pedido(Date fecha, EstadoPedido estado, List<LineaPedido> listaLineaPedidos,
-            Cliente cliente) {
+            Cliente cliente , Pagable pagable) {
         this.fecha = fecha;
         this.estado = estado;
         this.listaLineaPedidos = listaLineaPedidos;
         this.cliente = cliente;
+        this.pagable = pagable;
     }
 
     public boolean AñadirLineaPedido(LineaPedido lineaPedido) {

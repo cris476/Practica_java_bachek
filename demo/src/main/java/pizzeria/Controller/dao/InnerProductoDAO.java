@@ -9,7 +9,7 @@ public interface InnerProductoDAO {
 
     public void save(Producto producto) throws SQLException, ClassNotFoundException;
 
-    public void delete(Producto producto) throws SQLException, ClassNotFoundException;
+    public void delete(int idProducto) throws SQLException, ClassNotFoundException;
 
     public void update(Producto producto) throws SQLException, ClassNotFoundException;
 

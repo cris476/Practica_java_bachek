@@ -43,7 +43,10 @@ public class DatabaseConfig {
       public static final String SELECT_ALL_PRODUCT = "SELECT id  , nombre , precio , tipo FROM producto";
       public static final String SELECT_LINEAPEDIDO_BY_ID = "SELECT lineapedido.* FROM PEDIDO  INNER JOIN  lineapedido ON pedido.id =  lineapedido.id_pedido  where lineapedido.id_pedido = ?";
       public static final String SELECT_PEDIDO_ESTADO = "select pedido.* , lineapedido.id_producto from pedido  join lineapedido  on pedido.id = lineapedido.id_pedido where pedido.estadopedido = ? ";
-      public static final String SELECT_PEDIDO_ID = "select  *  from pedido  join lineapedido  on pedido.id = lineapedido.id_pedido where  pedido.cliente_id = ?";
+      public static final String SELECT_PEDIDO_ID = "SELECT DISTINCT pedido.*, lineapedido.*\n" + //
+                  "FROM pedido\n" + //
+                  "JOIN lineapedido ON pedido.id = lineapedido.id_pedido\n" + //
+                  "WHERE pedido.cliente_id = ?";
       public static final String SELECT_INGREDIENTE_ALERGENO_EXIST = "select  * from  ingrediente_alergeno where ingrediente_alergeno.id_ingrediente = ? and  ingrediente_alergeno.id_alergeno = ? ;";
       public static final String SELECT_PRODUCTO_INGREDIENTE_EXIST = "select * from producto_ingrediente where id_producto = ? and id_ingrediente = ? ";
       public static final String SELECT_PRODUCTO_NAME_SIZE = "SELECT * FROM producto\n" + //
@@ -53,7 +56,7 @@ public class DatabaseConfig {
                   "    OR (? IS NULL AND producto.size IS NULL)\n" + //
                   ");";
 
-      public static final String UPDATE_CLIENTE = "UPDATE cliente SET  dni = ?  ,nombre = ? direccion = ? , email = ? , password = ? , admin = ? , telefono = ?  where id= ?";
+      public static final String UPDATE_CLIENTE = "UPDATE cliente SET nombre = ? , direccion = ?  , password = ? , admin = ? , telefono = ?  where id= ?";
       public static final String UPDATE_PEDIDO_ESTADO_AND_PAGO = "UPDATE pedido SET estadopedido = ? , metodopago = ?  where id = ? ";
       public static final String UPDATE_PEDIDO_ESTADO = "UPDATE pedido SET estadopedido = ?  where id = ? ";
       public static final String UPDATE_PRODUCTO = "UPDATE producto SET nombre = ? , precio = ? , tipo = ? , size = ?  where id = ?";

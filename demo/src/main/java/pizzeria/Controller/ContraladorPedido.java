@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import pizzeria.Controller.dao.InnerPedido;
 import pizzeria.Controller.dao.impl.JdbcPedidoDAO;
 import pizzeria.Modelo.*;
 
 public class ContraladorPedido {
 
-    JdbcPedidoDAO jdbcPedidoDAO = new JdbcPedidoDAO();
+    InnerPedido jdbcPedidoDAO = new JdbcPedidoDAO();
 
     public void savePedido(Pedido pedido) throws ClassNotFoundException, SQLException {
         jdbcPedidoDAO.save(pedido.getCliente().getId(), pedido);
@@ -32,7 +33,7 @@ public class ContraladorPedido {
 
         if (PedidoExistente == null) {
             lineaPedidos.add(new LineaPedido(cantidad, producto));
-            pedidoNuevo = new Pedido(new Date(), EstadoPedido.PENDIENTE, lineaPedidos, cliente);
+            pedidoNuevo = new Pedido( new Date(), EstadoPedido.PENDIENTE, lineaPedidos, cliente , null);
             savePedido(pedidoNuevo);
         } else {
             jdbcPedidoDAO.addCarrito(PedidoExistente, producto, cantidad);
@@ -75,6 +76,10 @@ public class ContraladorPedido {
         pedidoPendiente.setEstado(EstadoPedido.ENTREGADO);
 
         jdbcPedidoDAO.updatePedidoEstado(pedidoPendiente);
+    }
+
+    public void eliminarPedido(int idPedido) throws ClassNotFoundException, SQLException {
+        jdbcPedidoDAO.delete(idPedido);
     }
 
 }

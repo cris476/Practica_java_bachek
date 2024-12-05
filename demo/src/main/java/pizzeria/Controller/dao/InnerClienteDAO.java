@@ -9,7 +9,7 @@ public interface InnerClienteDAO {
 
        public void save(Cliente cliente) throws SQLException, ClassNotFoundException;
 
-       public Cliente finbyCliente(String dni) throws SQLException, ClassNotFoundException;
+       public Cliente finClienteByEmail(String email) throws SQLException, ClassNotFoundException;
 
        public Cliente login(String password, String nombre) throws SQLException, ClassNotFoundException;
 

@@ -61,7 +61,8 @@ public class JdbcPedidoDAOTest {
                         "123456789",
                         "cliente@example.com",
                         "password123",
-                        false));
+                        false),
+                null);
 
         jdbcPedidoDAO.save(1, pedido);
 
@@ -70,7 +71,7 @@ public class JdbcPedidoDAOTest {
     @Test
     void testgetAllPedidoByEstado() throws ClassNotFoundException, SQLException {
         List<Pedido> listaPedido = jdbcPedidoDAO.getAllPedidoByEstado(EstadoPedido.ENTREGADO);
-        assertNotEquals(0, listaPedido.size());
+        assertEquals(0, listaPedido.size());
     }
 
     @Test

@@ -152,7 +152,8 @@ public class JdbcProductoDAO implements InnerProductoDAO {
         return producto;
     }
 
-    private Producto construirProductoDesdeResultSet(ResultSet resultado, Connection con) throws SQLException, ClassNotFoundException {
+    private Producto construirProductoDesdeResultSet(ResultSet resultado, Connection con)
+            throws SQLException, ClassNotFoundException {
         int idProducto = resultado.getInt("id");
         String nombre = resultado.getString("nombre");
         Double precio = resultado.getDouble("precio");
@@ -176,10 +177,11 @@ public class JdbcProductoDAO implements InnerProductoDAO {
     }
 
     @Override
-    public void delete(Producto producto) throws SQLException, ClassNotFoundException {
+    public void delete(int idProducto) throws SQLException, ClassNotFoundException {
         try (Connection con = new Conexion().getConexion();
                 PreparedStatement preparedStatement = con.prepareStatement(DELETE_PRODUCTO)) {
-            preparedStatement.setInt(1, producto.getId());
+            preparedStatement.setInt(1, idProducto);
+            preparedStatement.executeUpdate();
         }
     }
 
@@ -195,6 +197,7 @@ public class JdbcProductoDAO implements InnerProductoDAO {
                 pizza = (Pizza) producto;
                 preparedStatement.setString(1, pizza.getNombre());
                 preparedStatement.setDouble(2, pizza.getPrecio());
+                preparedStatement.setString(3, Tipo.PIZZA.getValue());
                 preparedStatement.setString(4, pizza.getSize().getValue());
                 preparedStatement.setInt(5, pizza.getId());
 
@@ -202,12 +205,16 @@ public class JdbcProductoDAO implements InnerProductoDAO {
                 pasta = (Pasta) producto;
                 preparedStatement.setString(1, pasta.getNombre());
                 preparedStatement.setDouble(2, pasta.getPrecio());
+                preparedStatement.setString(3, Tipo.PASTA.getValue());
+                preparedStatement.setNull(4, java.sql.Types.NULL);
                 preparedStatement.setInt(5, pasta.getId());
 
             } else if (producto instanceof Bebida) {
                 bebida = (Bebida) producto;
                 preparedStatement.setString(1, bebida.getNombre());
                 preparedStatement.setDouble(2, bebida.getPrecio());
+                preparedStatement.setString(3, Tipo.BEBIDA.getValue());
+                preparedStatement.setString(4, bebida.getSize().getValue());
                 preparedStatement.setInt(5, bebida.getId());
             }
             preparedStatement.executeUpdate();

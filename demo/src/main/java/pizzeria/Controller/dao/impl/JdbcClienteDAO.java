@@ -31,7 +31,7 @@ public class JdbcClienteDAO implements InnerClienteDAO {
     }
 
     @Override
-    public Cliente finbyCliente(String email) throws SQLException, ClassNotFoundException {
+    public Cliente finClienteByEmail(String email) throws SQLException, ClassNotFoundException {
 
         Cliente cliente = null;
         try (Connection con = new Conexion().getConexion();
@@ -95,14 +95,12 @@ public class JdbcClienteDAO implements InnerClienteDAO {
 
         try (Connection con = new Conexion().getConexion();
                 PreparedStatement preparedStatement = con.prepareStatement(UPDATE_CLIENTE)) {
-            preparedStatement.setString(1, cliente.getDni());
-            preparedStatement.setString(2, cliente.getNombre());
-            preparedStatement.setString(3, cliente.getDireccion());
-            preparedStatement.setString(4, cliente.getEmail());
-            preparedStatement.setString(5, cliente.getPassword());
-            preparedStatement.setBoolean(6, cliente.getAdmin());
-            preparedStatement.setString(7, cliente.getTelefono());
-            preparedStatement.setInt(8, cliente.getId());
+            preparedStatement.setString(1, cliente.getNombre());
+            preparedStatement.setString(2, cliente.getDireccion());
+            preparedStatement.setString(3, cliente.getPassword());
+            preparedStatement.setBoolean(4, cliente.getAdmin());
+            preparedStatement.setString(5, cliente.getTelefono());
+            preparedStatement.setInt(6, cliente.getId());
             preparedStatement.executeUpdate();
         }
     }
